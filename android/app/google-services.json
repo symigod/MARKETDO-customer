@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "780102967000",
+    "project_id": "marketdoapp",
+    "storage_bucket": "marketdoapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780102967000:android:af3d1b7fd390ef64e901ad",
+        "android_client_info": {
+          "package_name": "com.example.marketdo_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "780102967000-k8s7kfrr7ff1j7sfv5hgvhr9ominkapg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.marketdo_app",
+            "certificate_hash": "f6ad910778e4107f4d8515f11105da5ef1753c23"
+          }
+        },
+        {
+          "client_id": "780102967000-0slnqoqg8hv37lcgb942agoc7k71oldi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsn3ay1y1mUeUYubvpSusXYSO1JSkoVwY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "780102967000-0slnqoqg8hv37lcgb942agoc7k71oldi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
