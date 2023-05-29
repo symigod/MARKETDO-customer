@@ -15,250 +15,181 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? _userId;
-  int numOrders = 0; // Add this line to initialize numOrders
+  int numOrders = 0;
 
   @override
   void initState() {
     super.initState();
     _userId = _auth.currentUser!.uid;
-    fetchOrderCount(); // Call the function to fetch the order count
+    fetchOrderCount();
   }
 
   Future<void> fetchOrderCount() async {
     try {
       final QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('orders')
-          .where('userId', isEqualTo: _userId)
+          .where('customerID', isEqualTo: _userId)
           .get();
 
-      setState(() {
-        numOrders = snapshot.size;
-      });
+      setState(() => numOrders = snapshot.size);
     } catch (error) {
       print('Error fetching order count: $error');
     }
   }
 
+  Stream orderStream() => FirebaseFirestore.instance
+      .collection('orders')
+      .where('customerID', isEqualTo: _userId)
+      .snapshots();
+
+  Stream favoriteStream() => FirebaseFirestore.instance
+      .collection('favorites')
+      .where('customerID', isEqualTo: _userId)
+      .snapshots();
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('My Account'),
-        actions: [
-          IconButton(
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(title: const Text('My Account'), actions: [
+        IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-              Navigator.pushReplacementNamed(context, LoginScreen.id);
-            },
-          ),
-        ],
-      ),
+            onPressed: () => showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                        title: const Text('LOGOUT'),
+                        content: const Text('Do you want to continue?'),
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('NO')),
+                          TextButton(
+                              onPressed: () {
+                                FirebaseAuth.instance.signOut();
+                                Navigator.pushReplacementNamed(
+                                    context, LoginScreen.id);
+                              },
+                              child: const Text('YES'))
+                        ])))
+      ]),
       body: SingleChildScrollView(
-        child: FutureBuilder<DocumentSnapshot>(
-          future: FirebaseFirestore.instance
-              .collection('customer')
-              .doc(_userId)
-              .get(),
-          builder:
-              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
-              );
-            }
+          child: FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('customers')
+                  .doc(_userId)
+                  .get(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<DocumentSnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
 
-            if (!snapshot.hasData) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            Map<String, dynamic> userData =
-                snapshot.data!.data() as Map<String, dynamic>;
+                Map<String, dynamic> userData =
+                    snapshot.data!.data() as Map<String, dynamic>;
 
-            int numCartItems = 0; // replace with actual number of cart items
-
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 16),
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage(userData['logo']),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    userData['customerName'],
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text(userData['address'], style: TextStyle(fontSize: 18)),
-                  SizedBox(height: 8),
-                  Text(userData['mobile'], style: TextStyle(fontSize: 18)),
-                  SizedBox(height: 8),
-                  Text(userData['landMark'], style: TextStyle(fontSize: 18)),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Card(
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                return SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    child: ListView(children: [
+                      Stack(alignment: Alignment.center, children: [
+                        Container(
+                            padding: const EdgeInsets.all(20),
+                            height: 125,
+                            decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    image: NetworkImage(userData['coverPhoto']),
+                                    fit: BoxFit.cover))),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Text(
-                                'Orders',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              StreamBuilder<QuerySnapshot>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('orders')
-                                    .snapshots(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasError) {
-                                    return Text('Error: ${snapshot.error}');
-                                  }
-
-                                  if (!snapshot.hasData) {
-                                    return CircularProgressIndicator();
-                                  }
-
-                                  int totalOrders = snapshot.data!.docs.length;
-
-                                  return Text(
-                                    totalOrders.toString(),
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Card(
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Carts',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              StreamBuilder<QuerySnapshot>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('product')
-                                    .snapshots(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasError) {
-                                    return Text('Error: ${snapshot.error}');
-                                  }
-
-                                  if (!snapshot.hasData) {
-                                    return CircularProgressIndicator();
-                                  }
-
-                                  int totalProduct =
-                                      snapshot.data!.docs.length;
-
-                                  return Text(
-                                    totalProduct.toString(),
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      separatorBuilder: (context, index) {
-                        return const Divider(color: Colors.black12);
-                      },
-                      itemCount: 2,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return ListTile(
-                            leading: Icon(Icons.shopping_cart),
-                            title: const Text(
-                              'Orders',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                            trailing: const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 15,
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                          OrderScreen()));
-                            },
-                          );
-                        } else {
-                          return ListTile(
-                            leading: Icon(Icons.favorite),
-                            title: const Text(
-                              'My Favorites',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                            trailing: const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 15,
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                          FavoritesScreen()));
-                            },
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
+                              Container(
+                                  height: 100,
+                                  width: 100,
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: Colors.white, width: 3),
+                                      image: DecorationImage(
+                                          image: NetworkImage(userData['logo']),
+                                          fit: BoxFit.cover))),
+                            ])
+                      ]),
+                      ListTile(
+                          leading: const SizedBox(
+                              height: 50,
+                              width: 50,
+                              child: Center(child: Icon(Icons.person))),
+                          title: Text(userData['name'],
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text(userData['approved'] == true
+                              ? 'STATUS: APPROVED'
+                              : 'STATUS NOT APPROVED')),
+                      ListTile(
+                          leading: const SizedBox(
+                              height: 50,
+                              width: 50,
+                              child: Center(child: Icon(Icons.perm_phone_msg))),
+                          title: Text(userData['mobile']),
+                          subtitle: Text(userData['email'])),
+                      ListTile(
+                          leading: const SizedBox(
+                              height: 50,
+                              width: 50,
+                              child: Center(child: Icon(Icons.location_on))),
+                          title: Text(userData['address']),
+                          subtitle: Text(userData['landMark'])),
+                      const Divider(),
+                      StreamBuilder(
+                          stream: orderStream(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            }
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                            return ListTile(
+                                leading: const Icon(Icons.shopping_cart),
+                                title: Text(
+                                    'My Orders (${snapshot.data!.docs.length})'),
+                                trailing: const Icon(Icons.arrow_forward_ios,
+                                    size: 15),
+                                onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            OrderScreen(
+                                                stream: orderStream()))));
+                          }),
+                      StreamBuilder(
+                          stream: favoriteStream(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            }
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                            return ListTile(
+                                leading: const Icon(Icons.favorite),
+                                title: Text(
+                                    'My Favorites (${snapshot.data!.docs.length})'),
+                                trailing: const Icon(Icons.arrow_forward_ios,
+                                    size: 15),
+                                onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => FavoritesScreen(
+                                            stream: favoriteStream()))));
+                          })
+                    ]));
+              })));
 }
 
 

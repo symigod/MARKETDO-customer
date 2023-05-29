@@ -1,57 +1,50 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Customer {
+  final String address;
+  final bool approved;
+  final String coverPhoto;
+  final String email;
+  final String landMark;
+  final String logo;
+  final String mobile;
+  final String name;
+  final Timestamp time;
 
-  Customer({
-    this.approved,
-    this.customerName,
-    this.address,
-    this.email,
-    this.landMark,
-    this.logo,
-    this.cusImage,
-    this.mobile,
-    this.time,
-    this.uid});
+  Customer(
+      {required this.address,
+      required this.approved,
+      required this.coverPhoto,
+      required this.email,
+      required this.landMark,
+      required this.logo,
+      required this.mobile,
+      required this.name,
+      required this.time});
 
   Customer.fromJson(Map<String, Object?> json)
       : this(
-    approved: json['approved']! as bool,
-    customerName: json['customerName']! as String,
-    address: json['address']! as String,
-    email: json['email']! as String,
-    landMark: json['landMark']! as String,
-    logo: json['logo']! as String,
-    mobile: json['mobile']! as String,
-    cusImage: json['cusImage']! as String,
-    time: json['time']! as Timestamp,
-    uid: json['uid']! as String,
-
-  );
-
-  final bool? approved;
-  final String? customerName;
-  final String? address;
-  final String? email;
-  final String? landMark;
-  final String? logo;
-  final String? cusImage;
-  final String? mobile;
-  final Timestamp? time;
-  final String? uid;
+            address: json['address']! as String,
+            approved: json['approved']! as bool,
+            coverPhoto: json['coverPhoto']! as String,
+            email: json['email']! as String,
+            landMark: json['landMark']! as String,
+            logo: json['logo']! as String,
+            mobile: json['mobile']! as String,
+            name: json['name']! as String,
+            time: json['time']! as Timestamp);
 
   Map<String, Object?> toJson() {
     return {
-      'approved': approved,
-      'customerName': customerName,
       'address': address,
+      'approved': approved,
+      'coverPhoto': coverPhoto,
       'email': email,
       'landMark': landMark,
       'logo': logo,
-      'cusImage': cusImage,
       'mobile': mobile,
-      'time': time,
-      'uid': uid
+      'name': name,
+      'time': time
     };
   }
 }

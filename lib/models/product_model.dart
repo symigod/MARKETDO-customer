@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Product {
-  final String productName;
+  final String productID;
+  final String? productName;
   final double? regularPrice;
   final String? category;
   final String? mainCategory;
@@ -18,7 +19,8 @@ class Product {
   final Map? seller;
   final bool? approved;
   Product(
-      {required this.productName,
+      {required this.productID,
+      this.productName,
       this.regularPrice,
       this.category,
       this.mainCategory,
@@ -37,6 +39,7 @@ class Product {
 
   Map<String, Object?> toJson() {
     return {
+      'productID': productID,
       'productName': productName,
       'regularPrice': regularPrice,
       'category': category,
@@ -58,6 +61,7 @@ class Product {
 
   Product.fromJson(Map<String, Object?> json)
       : this(
+          productID: json['productID']! as String,
           productName: json['productName']! as String,
           regularPrice: json['regularPrice']! as double,
           category: json['category']! as String,
@@ -89,23 +93,20 @@ class Product {
         );
 }
 
-productQuery({category}) {
-  return FirebaseFirestore.instance
-      .collection('product')
-      .where('approved', isEqualTo: true)
-      .where('category', isEqualTo: category)
-      .withConverter<Product>(
-        fromFirestore: (snapshot, _) => Product.fromJson(snapshot.data()!),
-        toFirestore: (product, _) => product.toJson(),
-      );
-}
+productQuery({category}) => FirebaseFirestore.instance
+    .collection('product')
+    .where('approved', isEqualTo: true)
+    .where('category', isEqualTo: category)
+    .withConverter<Product>(
+      fromFirestore: (snapshot, _) => Product.fromJson(snapshot.data()!),
+      toFirestore: (product, _) => product.toJson(),
+    );
 
-// Stream<List<Product>> searchProduct(String searchText) {
-//   return FirebaseFirestore.instance
-//       .collection('products')
-//       .where('productName', isGreaterThanOrEqualTo: searchText)
-//       .where('productName', isLessThan: '${searchText}z')
-//       .snapshots()
-//       .map((product) =>
-//           product.docs.map((doc) => Product.fromJson(doc.data())).toList());
-// }
+searchQuery({searchText}) => FirebaseFirestore.instance
+        .collection('product')
+        .orderBy('productName')
+        .startAt([searchText.toUpperCase()]).endAt(
+            ['${searchText.toUpperCase()}\uf8ff']).withConverter<Product>(
+      fromFirestore: (snapshot, _) => Product.fromJson(snapshot.data()!),
+      toFirestore: (product, _) => product.toJson(),
+    );

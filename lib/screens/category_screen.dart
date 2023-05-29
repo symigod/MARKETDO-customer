@@ -17,90 +17,91 @@ class _CategoryScreenState extends State<CategoryScreen> {
   String? selectedCategories;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-         selectedCategories ==null ?  _title : selectedCategories!,
-          style: const TextStyle(
-              color: Colors.black,
-              fontSize: 16),),
-        elevation: 0,
+  Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(
-          color: Colors.black54
-        ),
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(IconlyLight.search),
-        //     onPressed: (){},
-        //   ),
-        //   IconButton(
-        //     icon: const Icon(IconlyLight.buy),
-        //     onPressed: (){},
-        //   ),
-        //   IconButton(
-        //     icon: const Icon(Icons.more_vert),
-        //     onPressed: (){},
-        //   ),
-        // ],
-      ),
-      body: Row(
-        children: [
-          Container(
-            width: 80,
-            color: Colors.grey.shade300,
-            child: FirestoreListView<Category>(
-              query: categoryCollection,
-        itemBuilder: (context, snapshot) {
-            Category category = snapshot.data();
-            return InkWell(
-              onTap: (){
-                setState(() {
-                  _title = category.catName!;
-                  selectedCategories = category.catName;
-                });
-              },
-              child: Container(
-                height:70,
-                color: selectedCategories == category.catName ? Colors.white : Colors.grey.shade300,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          height: 30,
-                          child: CachedNetworkImage(
-                            imageUrl: category.image!,
-                            color: selectedCategories == category.catName ? Theme.of(context).primaryColor: Colors.grey.shade700,
-                          ),
-                        ),
-
-                        Text(category.catName!,
-                          style: TextStyle(
-                              fontSize: 10,
-                            color: selectedCategories == category.catName ? Theme.of(context).primaryColor: Colors.grey.shade700,
-
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-        },
-        ),
+        appBar: AppBar(
+          title: Text(
+            selectedCategories == null ? _title : selectedCategories!,
+            style: const TextStyle(color: Colors.white),
           ),
-          MainCategoryWidget(
-            selectedCat: selectedCategories,
-          )
-        ],
-      ),
-    );
-  }
+          elevation: 0,
+          // backgroundColor: Colors.white,
+          backgroundColor: Colors.green,
+          iconTheme: const IconThemeData(color: Colors.black54),
+          // actions: [
+          //   IconButton(
+          //     icon: const Icon(IconlyLight.search),
+          //     onPressed: (){},
+          //   ),
+          //   IconButton(
+          //     icon: const Icon(IconlyLight.buy),
+          //     onPressed: (){},
+          //   ),
+          //   IconButton(
+          //     icon: const Icon(Icons.more_vert),
+          //     onPressed: (){},
+          //   ),
+          // ],
+        ),
+        body: Row(
+          children: [
+            Container(
+              width: 80,
+              color: Colors.grey.shade300,
+              child: FirestoreListView<Category>(
+                query: categoryCollection,
+                itemBuilder: (context, snapshot) {
+                  Category category = snapshot.data();
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _title = category.catName!;
+                        selectedCategories = category.catName;
+                      });
+                    },
+                    child: Container(
+                      height: 70,
+                      color: selectedCategories == category.catName
+                          ? Colors.white
+                          : Colors.grey.shade300,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                height: 30,
+                                child: CachedNetworkImage(
+                                  imageUrl: category.image!,
+                                  color: selectedCategories == category.catName
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey.shade700,
+                                ),
+                              ),
+                              Text(
+                                category.catName!,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: selectedCategories == category.catName
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey.shade700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            MainCategoryWidget(
+              selectedCat: selectedCategories,
+            )
+          ],
+        ),
+      );
 }

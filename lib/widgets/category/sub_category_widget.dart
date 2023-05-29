@@ -7,63 +7,43 @@ class SubCategoryWidget extends StatelessWidget {
   final String? selectedSubCat;
   const SubCategoryWidget({this.selectedSubCat, Key? key}) : super(key: key);
 
-
   @override
-  Widget build(BuildContext context) {
-    return Expanded(
+  Widget build(BuildContext context) => Expanded(
       child: FirestoreQueryBuilder<SubCategory>(
-        query: subCategoryCollection(
-            selectedSubCat: selectedSubCat
-        ),
-        builder: (context, snapshot, _){
-          if(snapshot.isFetching) {
-            return const CircularProgressIndicator();
-          }
-          if(snapshot.hasError){
-            return Center(child: Text('error ${snapshot.error}'));
-          }
-          return GridView.builder(
-            shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: snapshot.docs.length==0 ? 1/.1 :1/1.1
-            ),
+          query: subCategoryCollection(selectedSubCat: selectedSubCat),
+          builder: (context, snapshot, _) {
+            if (snapshot.isFetching) {
+              return const CircularProgressIndicator();
+            }
+            if (snapshot.hasError) {
+              return Center(child: Text('error ${snapshot.error}'));
+            }
+            return GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: snapshot.docs.isEmpty ? 1 / .1 : 1 / 1.1),
                 itemCount: snapshot.docs.length,
-              itemBuilder: (context, index){
-
+                itemBuilder: (context, index) {
                   SubCategory subCat = snapshot.docs[index].data();
                   return InkWell(
-                    onTap: (){
-                      //move to products screen
-                    },
-                    child: Column(
-                      children: [
+                      onTap: () {},
+                      child: Column(children: [
                         SizedBox(
-                          height: 60,
-                          width: 60,
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                              child: CachedNetworkImage(
-                                imageUrl: subCat.image!,
-                                placeholder: (context, _){
-                                  return Container(
-                                    height: 60,
-                                    width: 60,
-                                    color: Colors.grey.shade300,
-                                  );
-                                },
-                              ),),
-                        ),
-                        Text(subCat.subCatName!, style: const TextStyle(fontSize: 12),
-                        textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-              },
-            );
-        }
-      )
-    );
-  }
+                            height: 60,
+                            width: 60,
+                            child: FittedBox(
+                                fit: BoxFit.contain,
+                                child: CachedNetworkImage(
+                                    imageUrl: subCat.image!,
+                                    placeholder: (context, _) => Container(
+                                        height: 60,
+                                        width: 60,
+                                        color: Colors.grey.shade300)))),
+                        Text(subCat.subCatName!,
+                            style: const TextStyle(fontSize: 12),
+                            textAlign: TextAlign.center)
+                      ]));
+                });
+          }));
 }

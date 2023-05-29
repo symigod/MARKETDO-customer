@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/screens/cart_screen.dart';
@@ -34,7 +36,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-    if(widget.index!=null){
+    if (widget.index != null) {
       setState(() {
         _selectedIndex = widget.index!;
       });
@@ -43,59 +45,81 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 45),
-        
-      ),
+  Widget build(BuildContext context) => Scaffold(
+      floatingActionButton: const Padding(padding: EdgeInsets.only(bottom: 45)),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-     body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
+      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey.shade300),
-          ),
-        ),
-        child: BottomNavigationBar(
-          elevation: 4,
-          items:  <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(_selectedIndex == 0 ? Icons.home : Icons.home_outlined),
-              label: 'Home',
-              // backgroundColor: Colors.greenAccent,
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(_selectedIndex == 1 ? IconlyBold.category : IconlyLight.category),
-              label: 'Categories',
-              // backgroundColor: Colors.greenAccent,
-            ),
-            // BottomNavigationBarItem(
-            //   icon: Icon(_selectedIndex == 2 ? IconlyBold.chat : IconlyLight.chat),
-            //   label: 'Messages',
-            //   // backgroundColor: Colors.purpleAccent,
-            // ),
-            BottomNavigationBarItem(
-              icon: Icon(_selectedIndex == 3 ? IconlyBold.buy : IconlyLight.buy),
-              label: 'Cart',
-              // backgroundColor: Colors.greenAccent,
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(_selectedIndex == 4 ? CupertinoIcons.person_solid : CupertinoIcons.person),
-              label: 'Account',
-              // backgroundColor: Colors.purpleAccent,
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.greenAccent,
-          showUnselectedLabels: true,
-          unselectedItemColor: Colors.grey,
-          onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed,
-          selectedFontSize: 12,
-        ),
-      ),
-    );
-  }
+          decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: Colors.grey.shade300))),
+          child: BottomNavigationBar(
+              elevation: 4,
+              items: [
+                BottomNavigationBarItem(
+                    icon: Icon(
+                        _selectedIndex == 0 ? Icons.home : Icons.home_outlined),
+                    label: 'Home'),
+                BottomNavigationBarItem(
+                    icon: Icon(_selectedIndex == 1
+                        ? IconlyBold.category
+                        : IconlyLight.category),
+                    label: 'Categories'),
+                BottomNavigationBarItem(
+                    icon: Stack(children: [
+                      Icon(_selectedIndex == 3
+                          ? IconlyBold.buy
+                          : IconlyLight.buy),
+                      StreamBuilder(
+                          stream: FirebaseFirestore.instance
+                              .collection('carts')
+                              .where('customerID',
+                                  isEqualTo:
+                                      FirebaseAuth.instance.currentUser!.uid)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return Center(
+                                  child: Text('Error: ${snapshot.error}'));
+                            }
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Positioned(
+                                  right: 0, top: 0, child: Container());
+                            }
+                            return Positioned(
+                                right: 0,
+                                top: 0,
+                                child: snapshot.data!.docs.isEmpty
+                                    ? Container()
+                                    : Container(
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: const BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle),
+                                        constraints: const BoxConstraints(
+                                            minWidth: 12, minHeight: 12),
+                                        child: Text(
+                                            snapshot.data!.docs.length
+                                                .toString(),
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold),
+                                            textAlign: TextAlign.center)));
+                          })
+                    ]),
+                    label: 'Cart'),
+                BottomNavigationBarItem(
+                    icon: Icon(_selectedIndex == 4
+                        ? CupertinoIcons.person_solid
+                        : CupertinoIcons.person),
+                    label: 'Account')
+              ],
+              currentIndex: _selectedIndex,
+              selectedItemColor: Colors.green,
+              showUnselectedLabels: true,
+              unselectedItemColor: Colors.grey,
+              onTap: _onItemTapped,
+              type: BottomNavigationBarType.fixed,
+              selectedFontSize: 12)));
 }

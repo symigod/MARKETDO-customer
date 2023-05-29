@@ -1,31 +1,40 @@
 class CartModel {
-  final String id;
-  final List imageUrls;
-  final String productName;
-  final double regularPrice;
-  final String sellerName;
+  final String customerID;
+  final String productID;
+  final String vendorID;
+  // final String cartID;
+  // final List imageUrls;
+  // final double regularPrice;
+  // final String sellerName;
 
-  CartModel(
-      {required this.id,
-      required this.imageUrls,
-      required this.productName,
-      required this.regularPrice,
-      required this.sellerName});
+  CartModel({
+    required this.customerID,
+    required this.productID,
+    required this.vendorID,
+    // required this.cartID,
+    // required this.imageUrls,
+
+    // required this.regularPrice,
+    // required this.sellerName
+  });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'imageUrls': imageUrls,
-        'productName': productName,
-        'regularPrice': regularPrice,
-        'sellerName': sellerName
+        'customerID': customerID,
+        'productID': productID,
+        'vendorID': vendorID,
+        // 'cartID': cartID,
+        // 'imageUrls': imageUrls,
+        // 'regularPrice': regularPrice,
+        // 'sellerName': sellerName
       };
 
   static CartModel fromJson(Map<String, dynamic> json) => CartModel(
-      id: json['id'],
-      imageUrls: json['imageUrls'],
-      productName: json['productName'],
-      regularPrice: json['regularPrice'],
-      sellerName: json['sellerName']);
+        customerID: json['customerID'],
+        productID: json['productID'],
+        vendorID: json['vendorID'],
+        // cartID: json['cartID'],
+        // imageUrls: json['imageUrls'],
+        // regularPrice: json['regularPrice'],
+        // sellerName: json['sellerName']
+      );
 }
-
-// kini ra nga format sa MODEL gamita

@@ -8,58 +8,37 @@ class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
+  Widget build(BuildContext context) => StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
-      // If the user is already signed-in, use it as initial data
       initialData: FirebaseAuth.instance.currentUser,
-      builder: (context, snapshot) {
-        // User is not signed in
-        if (!snapshot.hasData) {
-          return SignInScreen(
-
-              headerBuilder: (context, constraints, _) {
-                return const Padding(
+      builder: (context, snapshot) => !snapshot.hasData
+          ? SignInScreen(
+              headerBuilder: (context, constraints, _) => const Padding(
                   padding: EdgeInsets.all(20),
                   child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Center(
-                      child: Text(
-                        'Marketdo App', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),textAlign: TextAlign.center,),),
-                  ),
-                );
-              },
-              subtitleBuilder: (context, action) {
-                return Padding(
+                      aspectRatio: 1,
+                      child: Center(
+                          child: Text('Marketdo App',
+                              style: TextStyle(
+                                  fontSize: 30, fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center)))),
+              subtitleBuilder: (context, action) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    action == AuthAction.signIn
-                        ? 'Welcome to Marketdo App - Customer! \nPlease sign in to continue.'
-                        : 'Welcome to Customer-App! \nPlease create an account to continue',
-                  ),
-                );
-              },
-              footerBuilder: (context, _) {
-                return const Padding(
+                  child: Text(action == AuthAction.signIn
+                      ? 'Welcome to Marketdo App - Customer! \nPlease sign in to continue.'
+                      : 'Welcome to Customer-App! \nPlease create an account to continue')),
+              footerBuilder: (context, _) => const Padding(
                   padding: EdgeInsets.only(top: 16),
                   child: Text(
-                    'By signing in, you agree to our terms and conditions.',
-                    style: TextStyle(color: Colors.grey),textAlign: TextAlign.center,
-                  ),
-                );
-              },
-
+                      'By signing in, you agree to our terms and conditions.',
+                      style: TextStyle(color: Colors.grey),
+                      textAlign: TextAlign.center)),
               providerConfigs: const [
-                EmailProviderConfiguration(),
-                GoogleProviderConfiguration(clientId: '1:780102967000:android:af3d1b7fd390ef64e901ad'),
-                PhoneProviderConfiguration()
-              ]
-          );
-        }
-
-        // Render your application if authenticated
-        return const LandingScreen();
-      },
-    );
-  }
+                  EmailProviderConfiguration(),
+                  GoogleProviderConfiguration(
+                      clientId:
+                          '1:780102967000:android:af3d1b7fd390ef64e901ad'),
+                  PhoneProviderConfiguration()
+                ])
+          : const LandingScreen());
 }

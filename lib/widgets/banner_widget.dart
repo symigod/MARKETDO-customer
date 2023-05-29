@@ -12,11 +12,9 @@ class BannerWidget extends StatefulWidget {
 }
 
 class _BannerWidgetState extends State<BannerWidget> {
-
   final FirebaseService _service = FirebaseService();
   double scrollPosition = 0;
   final List _bannerImage = [];
-
 
   @override
   void initState() {
@@ -24,102 +22,69 @@ class _BannerWidgetState extends State<BannerWidget> {
     super.initState();
   }
 
-  getBanners(){
-    return _service.homeBanner
-        .get()
-        .then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        //we get all the documents for banners
-        setState(() {
-          _bannerImage.add(doc['image']);
-        });
-      });
+  getBanners() {
+    return _service.homeBanner.get().then((QuerySnapshot querySnapshot) {
+      for (var doc in querySnapshot.docs) {
+        setState(() => _bannerImage.add(doc['image']));
+      }
     });
   }
 
-
-
   @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
+  Widget build(BuildContext context) => Stack(children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(8,0,8,8),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: _bannerImage.isEmpty ? GFShimmer(
-              showShimmerEffect: true,
-              mainColor: Colors.grey.shade500,
-              secondaryColor: Colors.grey.shade400,
-              child: Container(
-                color: Colors.grey.shade300,
-                height: 140,
-                width: MediaQuery.of(context).size.width,
-              ),
-            ) :Container(
-              color: Colors.grey.shade200,
-              height: 140,
-              width: MediaQuery.of(context).size.width,
-                child:  PageView.builder(
-                  itemCount: _bannerImage.length,
-                  itemBuilder: (BuildContext context, int index){
-                    return Image.network(_bannerImage[index], fit: BoxFit.cover,);
-                  },
-                  onPageChanged: (val){
-                    setState(() {
-                      scrollPosition = val.toDouble();
-                    });
-                  },
-                ),
-              ),
-            ),
-          ),
-        _bannerImage.isEmpty ? Container():
-        Positioned(
-          bottom: 10.0,
-          child: DotsIndicatorWidget(scrollPosition: scrollPosition,
-            itemList: _bannerImage,
-          ),
-        )
-      ],
-    );
-  }
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: _bannerImage.isEmpty
+                    ? GFShimmer(
+                        showShimmerEffect: true,
+                        mainColor: Colors.grey.shade500,
+                        secondaryColor: Colors.grey.shade400,
+                        child: Container(
+                            color: Colors.grey.shade300,
+                            height: 140,
+                            width: MediaQuery.of(context).size.width))
+                    : Container(
+                        color: Colors.grey.shade200,
+                        height: 140,
+                        width: MediaQuery.of(context).size.width,
+                        child: PageView.builder(
+                            itemCount: _bannerImage.length,
+                            itemBuilder: (BuildContext context, int index) =>
+                                Image.network(_bannerImage[index],
+                                    fit: BoxFit.cover),
+                            onPageChanged: (val) => setState(
+                                () => scrollPosition = val.toDouble()))))),
+        _bannerImage.isEmpty
+            ? Container()
+            : Positioned(
+                bottom: 10.0,
+                child: DotsIndicatorWidget(
+                    scrollPosition: scrollPosition, itemList: _bannerImage))
+      ]);
 }
 
 class DotsIndicatorWidget extends StatelessWidget {
-  const DotsIndicatorWidget({
-    super.key,
-    required this.scrollPosition,
-    required this.itemList,
-
-  });
+  const DotsIndicatorWidget(
+      {super.key, required this.scrollPosition, required this.itemList});
 
   final double scrollPosition;
   final List itemList;
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
+  Widget build(BuildContext context) => Row(children: [
         SizedBox(
-          width:MediaQuery.of(context).size.width,
-          child: DotsIndicator(
-            position: scrollPosition,
-            dotsCount: itemList.length,
-            decorator: DotsDecorator(
-                activeColor: Colors.greenAccent,
-                spacing: const EdgeInsets.all(2),
-                size: const Size.square(6),
-                activeSize: const Size(12,6),
-                activeShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4)
-                )
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+            width: MediaQuery.of(context).size.width,
+            child: DotsIndicator(
+                position: scrollPosition,
+                dotsCount: itemList.length,
+                decorator: DotsDecorator(
+                    activeColor: Colors.greenAccent,
+                    spacing: const EdgeInsets.all(2),
+                    size: const Size.square(6),
+                    activeSize: const Size(12, 6),
+                    activeShape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)))))
+      ]);
 }
-
-

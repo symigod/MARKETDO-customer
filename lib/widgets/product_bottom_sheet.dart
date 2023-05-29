@@ -13,18 +13,18 @@ class ProductBottomSheet extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(head!, style: TextStyle(color: Colors.grey),),
+                    Text(head!, style: const TextStyle(color: Colors.grey),),
                     Padding(
                       padding: const EdgeInsets.only(left: 30, top: 6, bottom: 6,),
                       child: Row(
                         children: [
-                          Icon(Icons.circle, size: 10,),
-                          SizedBox(width: 10,),
+                          const Icon(Icons.circle, size: 10,),
+                          const SizedBox(width: 10,),
                           Text(details!),
                         ],
                       ),
                     ),
-                    SizedBox(height: 10,),
+                    const SizedBox(height: 10,),
                   ],
                 ),
                 );
@@ -43,12 +43,12 @@ class ProductBottomSheet extends StatelessWidget {
               automaticallyImplyLeading: false,
               title: const Text('Specification', style: TextStyle(fontSize: 20, color: Colors.black ),),
               centerTitle: true,
-              iconTheme: IconThemeData(
+              iconTheme: const IconThemeData(
                 color: Colors.black
               ),
               actions: [
                 IconButton(
-                  icon: Icon(Icons.close),
+                  icon: const Icon(Icons.close),
                   onPressed: ()=> Navigator.pop(context) ,
                   )
               ],
@@ -61,7 +61,7 @@ class ProductBottomSheet extends StatelessWidget {
                 children: [
                   if(product!.seller!=null)
                     Center(child: Image.network(product!.seller!['logo'])),
-                    Divider(
+                    const Divider(
                       color: Colors.grey,
                     ),
                   if(product!.seller!=null)
@@ -81,7 +81,7 @@ class ProductBottomSheet extends StatelessWidget {
                   ),
                   if(product!.otherDetails!=null)
                   Text(product!.otherDetails!),
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10,),
                   
                 ],
               ),

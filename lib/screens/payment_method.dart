@@ -68,8 +68,8 @@ class _PaymentMethodsState extends State<PaymentMethods> {
               ),
             ),
             if (_isGCashSelected)
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
+              const Padding(
+                padding: EdgeInsets.only(top: 16.0),
                 child: Text(
                   'Pay your balance in 5 hours, to process your orders.\nSend Money to 09454336651 (Arnulfo Godinez)',
                   style: TextStyle(
@@ -87,7 +87,7 @@ class _PaymentMethodsState extends State<PaymentMethods> {
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(Colors.red),
           ),
-          child: Text(
+          child: const Text(
             'Place my Order',
             style: TextStyle(color: Colors.white),
           ),

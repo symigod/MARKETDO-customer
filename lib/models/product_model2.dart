@@ -10,6 +10,7 @@ class Product2 {
   final mainCategory;
   final manageInventory;
   final otherDetails;
+  final productID;
   final productName;
   final regularPrice;
   final seller;
@@ -28,6 +29,7 @@ class Product2 {
     required this.mainCategory,
     required this.manageInventory,
     required this.otherDetails,
+    required this.productID,
     required this.productName,
     required this.regularPrice,
     required this.seller,
@@ -48,6 +50,7 @@ class Product2 {
       'mainCategory': mainCategory,
       'manageInventory': manageInventory,
       'otherDetails': otherDetails,
+      'productID': productID,
       'productName': productName,
       'regularPrice': regularPrice,
       'seller': seller,
@@ -69,6 +72,7 @@ class Product2 {
       mainCategory: map['mainCategory'],
       manageInventory: map['manageInventory'],
       otherDetails: map['otherDetails'],
+      productID: map['productID'],
       productName: map['productName'],
       regularPrice: map['regularPrice'],
       seller: map['seller'],
@@ -83,9 +87,9 @@ class Product2 {
 Stream<List<Product2>> searchProduct(String searchText) {
   return FirebaseFirestore.instance
       .collection('products')
-      // .where('productName', isEqualTo: searchText)
-      // .where('productName', isGreaterThanOrEqualTo: searchText)
-      // .where('productName', isLessThan: '${searchText}z')
+      .where('productName', isEqualTo: searchText)
+      .where('productName', isGreaterThanOrEqualTo: searchText)
+      .where('productName', isLessThan: '${searchText}z')
       .snapshots()
       .map((product) =>
           product.docs.map((doc) => Product2.fromMap(doc.data())).toList());
