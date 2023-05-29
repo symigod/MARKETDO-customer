@@ -1,40 +1,34 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class CartModel {
-  final String customerID;
-  final String productID;
-  final String vendorID;
-  // final String cartID;
-  // final List imageUrls;
-  // final double regularPrice;
-  // final String sellerName;
+  final cartID;
+  final customerID;
+  final productIDs;
+  final vendorID;
 
   CartModel({
+    required this.cartID,
     required this.customerID,
-    required this.productID,
+    required this.productIDs,
     required this.vendorID,
-    // required this.cartID,
-    // required this.imageUrls,
-
-    // required this.regularPrice,
-    // required this.sellerName
   });
 
-  Map<String, dynamic> toJson() => {
-        'customerID': customerID,
-        'productID': productID,
-        'vendorID': vendorID,
-        // 'cartID': cartID,
-        // 'imageUrls': imageUrls,
-        // 'regularPrice': regularPrice,
-        // 'sellerName': sellerName
-      };
+  factory CartModel.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = (doc.data() as Map<String, dynamic>);
+    return CartModel(
+      cartID: data['cartID'],
+      customerID: data['customerID'],
+      productIDs: data['productIDs'],
+      vendorID: data['vendorID'],
+    );
+  }
 
-  static CartModel fromJson(Map<String, dynamic> json) => CartModel(
-        customerID: json['customerID'],
-        productID: json['productID'],
-        vendorID: json['vendorID'],
-        // cartID: json['cartID'],
-        // imageUrls: json['imageUrls'],
-        // regularPrice: json['regularPrice'],
-        // sellerName: json['sellerName']
-      );
+  Map<String, dynamic> toFirestore() => {
+        'cartID': cartID,
+        'customerID': customerID,
+        'productIDs': productIDs,
+        'vendorID': vendorID,
+      };
 }

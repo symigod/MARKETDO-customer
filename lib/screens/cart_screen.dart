@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:marketdo_app/models/product_model.dart';
+import 'package:marketdo_app/models/vendor_model.dart';
+import 'package:marketdo_app/widgets/dialogs.dart';
+import 'package:marketdo_app/widgets/stream_widgets.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -10,15 +14,27 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
+  CollectionReference cartsCollection =
+      FirebaseFirestore.instance.collection('carts');
+  CollectionReference vendorsCollection =
+      FirebaseFirestore.instance.collection('vendor');
+  CollectionReference productsCollection =
+      FirebaseFirestore.instance.collection('product');
+
+  Stream getCarts() => cartsCollection
+      .where('customerID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+      .snapshots();
+
+  Stream<List<VendorModel>> getVendor(String vendorID) => vendorsCollection
+      .where('vendorID', isEqualTo: vendorID)
+      .snapshots()
+      .map((vendor) =>
+          vendor.docs.map((doc) => VendorModel.fromFirestore(doc)).toList());
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(title: const Text('Shopping Cart')),
       body: StreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('carts')
-              .where('customerID',
-                  isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-              .snapshots(),
+          stream: getCarts(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
@@ -26,106 +42,172 @@ class _CartScreenState extends State<CartScreen> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text('NOTHING IN CART'));
+            if (snapshot.hasData) {
+              List<QueryDocumentSnapshot> carts = snapshot.data!.docs;
+              return ListView.builder(
+                  itemCount: carts.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    String cartID = carts[index].id;
+                    List<dynamic> productIDs = carts[index]['productIDs'];
+                    String vendorID = carts[index]['vendorID'];
+                    return Card(
+                        margin: const EdgeInsets.all(7),
+                        shape: RoundedRectangleBorder(
+                            side:
+                                const BorderSide(width: 1, color: Colors.black),
+                            borderRadius: BorderRadius.circular(5)),
+                        child: Column(children: [
+                          Card(
+                              color: Colors.green.shade900,
+                              margin: EdgeInsets.zero,
+                              shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(5),
+                                      topRight: Radius.circular(5))),
+                              child: StreamBuilder(
+                                  stream: vendorsCollection
+                                      .doc(vendorID)
+                                      .snapshots(),
+                                  builder: (context, vendorSnapshot) {
+                                    if (vendorSnapshot.hasError) {
+                                      return streamErrorWidget(
+                                        vendorSnapshot.error.toString(),
+                                      );
+                                    }
+                                    if (vendorSnapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return streamLoadingWidget();
+                                    }
+                                    if (vendorSnapshot.hasData) {
+                                      DocumentSnapshot vendor =
+                                          vendorSnapshot.data!;
+                                      return Center(
+                                          child: Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Text(
+                                                  vendor['businessName'],
+                                                  style: const TextStyle(
+                                                      color: Colors.white))));
+                                    }
+                                    return streamEmptyWidget(
+                                        'VENDOR NOT FOUND');
+                                  })),
+                          FutureBuilder<List<DocumentSnapshot>>(
+                              future: _fetchProducts(productIDs),
+                              builder: (context, productsSnapshot) {
+                                if (productsSnapshot.hasError) {
+                                  return streamErrorWidget(
+                                      productsSnapshot.error.toString());
+                                }
+                                if (productsSnapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return streamLoadingWidget();
+                                }
+                                if (productsSnapshot.hasData) {
+                                  List<DocumentSnapshot> products =
+                                      productsSnapshot.data!;
+                                  double totalPrice = 0;
+                                  return Column(children: [
+                                    Column(
+                                        children: products.map((product) {
+                                      double regularPrice =
+                                          product['regularPrice'].toDouble();
+                                      totalPrice += regularPrice;
+                                      String formattedPrice =
+                                          'P ${regularPrice.toStringAsFixed(2)}';
+                                      return ListTile(
+                                          leading: SizedBox(
+                                              height: 40,
+                                              width: 40,
+                                              child: Image.network(
+                                                  product['imageURL'])),
+                                          title: Text(product['productName']),
+                                          subtitle: Text(formattedPrice),
+                                          trailing: IconButton(
+                                              onPressed: () =>
+                                                  deleteProductInCart(
+                                                      cartID,
+                                                      productIDs
+                                                          .indexOf(product.id)),
+                                              icon: const Icon(Icons.close,
+                                                  color: Colors.red)));
+                                    }).toList()),
+                                    Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10),
+                                        child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                  'TOTAL: P ${totalPrice.toStringAsFixed(2)}',
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                              TextButton(
+                                                  onPressed: () => showDialog(
+                                                      context: context,
+                                                      builder: (_) => errorDialog(
+                                                          context,
+                                                          'This feature will be available soon!')),
+                                                  child:
+                                                      const Text('Place Order'))
+                                            ]))
+                                  ]);
+                                }
+                                return streamEmptyWidget('PRODUCTS NOT FOUND');
+                              })
+                        ]));
+                  });
             }
-            Map<String, List<Product>> cartItems = {};
-            for (var doc in snapshot.data!.docs) {
-              String vendorName = doc['sellerName'];
-              Product product = Product(doc['productID'], doc['regularPrice'],
-                  doc['imageUrls'], doc.id);
-              if (!cartItems.containsKey(vendorName)) {
-                cartItems[vendorName] = [product];
-              } else {
-                cartItems[vendorName]!.add(product);
-              }
-            }
-            return ListView.builder(
-                itemCount: cartItems.length,
-                itemBuilder: (context, index) {
-                  String vendorName = cartItems.keys.elementAt(index);
-                  List<Product>? vendorProducts = cartItems[vendorName];
-                  return Card(
-                      margin: const EdgeInsets.all(10),
-                      shape: RoundedRectangleBorder(
-                          side: const BorderSide(color: Colors.black),
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Text(vendorName,
-                                    style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold))),
-                            ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: vendorProducts!.length,
-                                itemBuilder: (context, index) {
-                                  Product product = vendorProducts[index];
-
-                                  return ListTile(
-                                      title: Text(product.name),
-                                      subtitle: Text(
-                                          '₱${product.regularPrice.toStringAsFixed(2)}',
-                                          style: const TextStyle(
-                                              fontFamily: 'Roboto')),
-                                      leading:
-                                          Image.network(product.imageUrls[0]),
-                                      trailing: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            IconButton(
-                                                onPressed: () {
-                                                  FirebaseFirestore.instance
-                                                      .collection('carts')
-                                                      .doc(product.id)
-                                                      .delete();
-                                                  setState(() => vendorProducts
-                                                      .removeAt(index));
-                                                },
-                                                icon: const Icon(Icons.delete))
-                                          ]));
-                                }),
-                            Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: ElevatedButton(
-                                    onPressed: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                OrderSummaryScreen(
-                                                    vendorName: vendorName,
-                                                    products: vendorProducts))),
-                                    child: const Text('Checkout')))
-                          ]));
-                });
+            return streamEmptyWidget('NOTHING IN CART');
           }));
-}
 
-class Product {
-  final String name;
-  final double regularPrice;
-  final List imageUrls;
-  final String id; // Add a property for the document ID
+  Future<List<DocumentSnapshot>> _fetchProducts(
+      List<dynamic> productIDs) async {
+    List<DocumentSnapshot> products = [];
+    for (dynamic id in productIDs) {
+      DocumentSnapshot snapshot = await productsCollection.doc(id).get();
+      if (snapshot.exists) {
+        products.add(snapshot);
+      }
+    }
+    return products;
+  }
 
-  Product(this.name, this.regularPrice, this.imageUrls, this.id);
-
-  Map<String, dynamic> toMap() {
-    return {
-      'name': name,
-      'regularPrice': regularPrice,
-      'imageUrls': imageUrls,
-      'id': id,
-    };
+  void deleteProductInCart(String cartID, int index) async {
+    DocumentSnapshot cartSnapshot =
+        await FirebaseFirestore.instance.collection('carts').doc(cartID).get();
+    List<dynamic> productIDs = List<dynamic>.from(cartSnapshot['productIDs']);
+    if (index >= 0 && index < productIDs.length) {
+      productIDs.removeAt(index);
+      await FirebaseFirestore.instance
+          .collection('carts')
+          .doc(cartID)
+          .update({'productIDs': productIDs}).then((value) async {
+        if (productIDs.isEmpty) {
+          await FirebaseFirestore.instance
+              .collection('carts')
+              .doc(cartID)
+              .delete()
+              .then((value) => showDialog(
+                  context: context,
+                  builder: (_) => successDialog(
+                      context, 'Products in cart deleted successfully!')));
+        } else {
+          showDialog(
+              context: context,
+              builder: (_) =>
+                  successDialog(context, 'Product deleted successfully!'));
+        }
+      });
+    }
   }
 }
 
 class OrderSummaryScreen extends StatefulWidget {
   final String vendorName;
-  final List<Product> products;
+  final List<ProductModel> products;
 
   const OrderSummaryScreen(
       {Key? key, required this.vendorName, required this.products})
@@ -235,7 +317,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                 shrinkWrap: true,
                                 itemCount: widget.products.length,
                                 itemBuilder: (context, index) => ListTile(
-                                    title: Text(widget.products[index].name),
+                                    // title: Text(widget.products[index].name),
                                     subtitle: Text(
                                         '₱${widget.products[index].regularPrice}',
                                         style: const TextStyle(
@@ -299,9 +381,9 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                         FirebaseAuth.instance.currentUser!.uid,
                                     'orderStatus': 'Accepted',
                                     'paymentMethod': _selectedPaymentMethod,
-                                    'products': widget.products
-                                        .map((product) => product.toMap())
-                                        .toList(),
+                                    // 'products': widget.products
+                                    //     .map((product) => product.toMap())
+                                    //     .toList(),
                                     'shippingFee': 20,
                                     'shippingMethod': _selectedShippingMethod,
                                     'time': DateTime.now(),

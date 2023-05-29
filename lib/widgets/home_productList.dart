@@ -1,32 +1,36 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterfire_ui/firestore.dart';
 import 'package:marketdo_app/models/product_model.dart';
 import 'package:marketdo_app/screens/product_details_screen.dart';
+import 'package:marketdo_app/widgets/stream_widgets.dart';
 
 class HomeProductList extends StatelessWidget {
-  final String? category;
-  const HomeProductList({this.category, super.key});
+  const HomeProductList({super.key});
 
   @override
   Widget build(BuildContext context) => Container(
       color: Colors.grey.shade200,
-      child: FirestoreQueryBuilder<Product>(
-          query: productQuery(category: category),
-          builder: (context, snapshot, _) {
+      child: StreamBuilder(
+          stream: FirebaseFirestore.instance.collection('product').snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return streamErrorWidget(snapshot.error.toString());
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return streamLoadingWidget();
+            }
             return GridView.builder(
                 shrinkWrap: true,
                 physics: const ScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3, childAspectRatio: 1 / 1.4),
-                itemCount: snapshot.docs.length,
+                itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
-                  if (snapshot.hasMore && index + 1 == snapshot.docs.length) {
-                    snapshot.fetchMore();
-                  }
-                  var productIndex = snapshot.docs[index];
-                  Product product = productIndex.data();
-                  String productID = productIndex.id;
+                  List<ProductModel> productModel = snapshot.data!.docs
+                      .map((doc) => ProductModel.fromFirestore(doc))
+                      .toList();
+                  var product = productModel[index];
                   return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: InkWell(
@@ -35,10 +39,9 @@ class HomeProductList extends StatelessWidget {
                               PageRouteBuilder(
                                   transitionDuration:
                                       const Duration(milliseconds: 500),
-                                  pageBuilder: (context, __, ___) =>
+                                  pageBuilder: (context, a1, a2) =>
                                       ProductDetailScreen(
-                                          productId: productID,
-                                          product: product))),
+                                          productID: product.productID))),
                           child: Container(
                               padding: const EdgeInsets.all(8),
                               height: 80,
@@ -50,13 +53,13 @@ class HomeProductList extends StatelessWidget {
                                         height: 90,
                                         width: 90,
                                         child: Hero(
-                                            tag: product.imageUrls![0],
+                                            tag: product.imageURL,
                                             child: CachedNetworkImage(
-                                              imageUrl: product.imageUrls![0],
+                                              imageUrl: product.imageURL,
                                               fit: BoxFit.cover,
                                             )))),
                                 const SizedBox(height: 10),
-                                Text('${product.productName}',
+                                Text(product.productName,
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(fontSize: 10),
                                     maxLines: 2)

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:marketdo_app/screens/product_details_screen.dart';
+import 'package:marketdo_app/widgets/stream_widgets.dart';
 
 class FavoritesScreen extends StatefulWidget {
   final Stream stream;
@@ -17,32 +18,32 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
         appBar: AppBar(title: const Text('My Favorites')),
         body: StreamBuilder(
-            stream: widget.stream,
+            stream:
+                FirebaseFirestore.instance.collection('favorites').snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
+                return streamErrorWidget(snapshot.error.toString());
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
+                return streamLoadingWidget();
               }
               if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
-                return const Center(child: Text('NO FAVORITES YET'));
+                return streamEmptyWidget('NO FAVORITES YET');
               }
               return ListView.builder(
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (BuildContext context, int index) {
-                    final DocumentSnapshot document =
-                        snapshot.data!.docs[index];
-                    final String imageUrls = document['imageUrls'];
-                    final String productName = document['productName'];
-                    final String description = document['description'];
-                    final double regularPrice = document['regularPrice'];
+                    final favorite = snapshot.data!.docs[index];
+                    final String imageUrls = favorite['imageUrls'];
+                    final String productName = favorite['productName'];
+                    final String description = favorite['description'];
+                    final double regularPrice = favorite['regularPrice'];
                     return GestureDetector(
                         onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => ProductDetailScreen(
-                                    productId: document['productID']))),
+                                    productID: favorite['productID']))),
                         child: Card(
                             child: ListTile(
                                 leading: CachedNetworkImage(
