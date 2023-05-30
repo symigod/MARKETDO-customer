@@ -114,13 +114,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      backgroundColor: Colors.white,
       appBar: _showAppBar
-          ? AppBar(
-              elevation: 0,
-              backgroundColor: Colors.white,
-              iconTheme: const IconThemeData(color: Colors.grey),
-              actions: [_sizedBox(width: 10)])
+          ? AppBar(elevation: 0, title: const Text('Product Details'))
           : null,
       body: SafeArea(
           child: StreamBuilder(
@@ -487,14 +482,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             addToCart(FirebaseAuth.instance.currentUser!.uid, widget.productID,
                 vendorID);
           },
-          tileColor: Colors.grey[800],
-          title:
-              const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(Icons.bookmark, color: Colors.white),
-            Text('Add to Cart',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
-          ])));
+          tileColor: Colors.green.shade900,
+          trailing: const Icon(Icons.add_shopping_cart, color: Colors.white),
+          title: const Text('Add to Cart',
+              style: TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold))));
 
   addToCart(String customerID, String productID, String vendorID) async {
     try {
@@ -508,8 +500,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         final Map<String, dynamic> data = (doc.data() as Map<String, dynamic>);
         setState(() => checkedVendorID = data['vendorID']);
       }
-      print('CHECKED VENDOR ID: $checkedVendorID');
-      print('VENDOR ID: $vendorID');
       if (checkedVendorID == vendorID) {
         addToCartWithSameVendor(customerID, productID, vendorID);
       } else {
@@ -543,12 +533,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           Map<String, dynamic>? cartData = cart.data() as Map<String, dynamic>?;
           if (cartData != null && cartData.containsKey('productIDs')) {
             productIDs = cartData['productIDs'] as List<dynamic>;
-
-            // Access the values in the productIDs array
-            for (var productID in productIDs) {
-              print(productID);
-              // Perform any desired operations with the productID
-            }
+            // for (var productID in productIDs) {
+            //   print(productID);
+            // }
             productIDs.add(productID);
           }
           FirebaseFirestore.instance.collection('carts').doc(cart.id).update({

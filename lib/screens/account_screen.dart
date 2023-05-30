@@ -50,25 +50,7 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(title: const Text('My Account'), actions: [
-        IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                        title: const Text('LOGOUT'),
-                        content: const Text('Do you want to continue?'),
-                        actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('NO')),
-                          TextButton(
-                              onPressed: () {
-                                FirebaseAuth.instance.signOut();
-                                Navigator.pushReplacementNamed(
-                                    context, LoginScreen.id);
-                              },
-                              child: const Text('YES'))
-                        ])))
+        IconButton(icon: const Icon(Icons.logout), onPressed: () => logout())
       ]),
       body: SingleChildScrollView(
           child: FutureBuilder<DocumentSnapshot>(
@@ -112,7 +94,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                           color: Colors.white, width: 3),
                                       image: DecorationImage(
                                           image: NetworkImage(userData['logo']),
-                                          fit: BoxFit.cover))),
+                                          fit: BoxFit.cover)))
                             ])
                       ]),
                       ListTile(
@@ -120,9 +102,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               height: 50,
                               width: 50,
                               child: Center(child: Icon(Icons.person))),
-                          title: Text(userData['name'],
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text(userData['name']),
                           subtitle: Text(userData['approved'] == true
                               ? 'STATUS: APPROVED'
                               : 'STATUS NOT APPROVED')),
@@ -190,6 +170,27 @@ class _AccountScreenState extends State<AccountScreen> {
                           })
                     ]));
               })));
+
+  logout() {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+                title: const Text('LOGOUT'),
+                content: const Text('Do you want to continue?'),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('NO',
+                          style: TextStyle(color: Colors.red))),
+                  TextButton(
+                      onPressed: () {
+                        FirebaseAuth.instance.signOut();
+                        Navigator.pushReplacementNamed(context, LoginScreen.id);
+                      },
+                      child: Text('YES',
+                          style: TextStyle(color: Colors.green.shade900)))
+                ]));
+  }
 }
 
 

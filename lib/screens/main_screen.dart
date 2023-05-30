@@ -20,7 +20,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
+  final List<Widget> _widgetOptions = const [
     HomeScreen(),
     CategoryScreen(),
     // MessageScreen(),
@@ -29,17 +29,13 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
   }
 
   @override
   void initState() {
     if (widget.index != null) {
-      setState(() {
-        _selectedIndex = widget.index!;
-      });
+      setState(() => _selectedIndex = widget.index!);
     }
     super.initState();
   }
@@ -49,77 +45,71 @@ class _MainScreenState extends State<MainScreen> {
       floatingActionButton: const Padding(padding: EdgeInsets.only(bottom: 45)),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
-      bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: Colors.grey.shade300))),
-          child: BottomNavigationBar(
-              elevation: 4,
-              items: [
-                BottomNavigationBarItem(
-                    icon: Icon(
-                        _selectedIndex == 0 ? Icons.home : Icons.home_outlined),
-                    label: 'Home'),
-                BottomNavigationBarItem(
-                    icon: Icon(_selectedIndex == 1
-                        ? IconlyBold.category
-                        : IconlyLight.category),
-                    label: 'Categories'),
-                BottomNavigationBarItem(
-                    icon: Stack(children: [
-                      Icon(_selectedIndex == 3
-                          ? IconlyBold.buy
-                          : IconlyLight.buy),
-                      StreamBuilder(
-                          stream: FirebaseFirestore.instance
-                              .collection('carts')
-                              .where('customerID',
-                                  isEqualTo:
-                                      FirebaseAuth.instance.currentUser!.uid)
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasError) {
-                              return Center(
-                                  child: Text('Error: ${snapshot.error}'));
-                            }
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Positioned(
-                                  right: 0, top: 0, child: Container());
-                            }
-                            return Positioned(
-                                right: 0,
-                                top: 0,
-                                child: snapshot.data!.docs.isEmpty
-                                    ? Container()
-                                    : Container(
-                                        padding: const EdgeInsets.all(2),
-                                        decoration: const BoxDecoration(
-                                            color: Colors.red,
-                                            shape: BoxShape.circle),
-                                        constraints: const BoxConstraints(
-                                            minWidth: 12, minHeight: 12),
-                                        child: Text(
-                                            snapshot.data!.docs.length
-                                                .toString(),
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold),
-                                            textAlign: TextAlign.center)));
-                          })
-                    ]),
-                    label: 'Cart'),
-                BottomNavigationBarItem(
-                    icon: Icon(_selectedIndex == 4
-                        ? CupertinoIcons.person_solid
-                        : CupertinoIcons.person),
-                    label: 'Account')
-              ],
-              currentIndex: _selectedIndex,
-              selectedItemColor: Colors.green,
-              showUnselectedLabels: true,
-              unselectedItemColor: Colors.grey,
-              onTap: _onItemTapped,
-              type: BottomNavigationBarType.fixed,
-              selectedFontSize: 12)));
+      bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.green.shade900,
+          elevation: 4,
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(
+                    _selectedIndex == 0 ? Icons.home : Icons.home_outlined),
+                label: 'Home'),
+            BottomNavigationBarItem(
+                icon: Icon(_selectedIndex == 1
+                    ? IconlyBold.category
+                    : IconlyLight.category),
+                label: 'Categories'),
+            BottomNavigationBarItem(
+                icon: Stack(children: [
+                  Icon(_selectedIndex == 2 ? IconlyBold.buy : IconlyLight.buy),
+                  StreamBuilder(
+                      stream: FirebaseFirestore.instance
+                          .collection('carts')
+                          .where('customerID',
+                              isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        }
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Positioned(
+                              right: 0, top: 0, child: Container());
+                        }
+                        return Positioned(
+                            right: 0,
+                            top: 0,
+                            child: snapshot.data!.docs.isEmpty
+                                ? Container()
+                                : Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: const BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle),
+                                    constraints: const BoxConstraints(
+                                        minWidth: 12, minHeight: 12),
+                                    child: Text(
+                                        snapshot.data!.docs.length.toString(),
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center)));
+                      })
+                ]),
+                label: 'Cart'),
+            BottomNavigationBarItem(
+                icon: Icon(_selectedIndex == 3
+                    ? CupertinoIcons.person_solid
+                    : CupertinoIcons.person),
+                label: 'Account')
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.yellow,
+          showUnselectedLabels: true,
+          unselectedItemColor: Colors.white,
+          onTap: _onItemTapped,
+          type: BottomNavigationBarType.fixed,
+          selectedFontSize: 12));
 }

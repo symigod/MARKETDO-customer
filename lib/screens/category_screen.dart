@@ -18,16 +18,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: Text(
-            selectedCategories == null ? _title : selectedCategories!,
-            style: const TextStyle(color: Colors.white),
-          ),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+          title: Text(selectedCategories == null ? _title : selectedCategories!,
+              style: const TextStyle(color: Colors.white)),
           elevation: 0,
-          // backgroundColor: Colors.white,
-          backgroundColor: Colors.green,
-          iconTheme: const IconThemeData(color: Colors.black54),
+          iconTheme: const IconThemeData(color: Colors.black54)
           // actions: [
           //   IconButton(
           //     icon: const Icon(IconlyLight.search),
@@ -42,66 +38,51 @@ class _CategoryScreenState extends State<CategoryScreen> {
           //     onPressed: (){},
           //   ),
           // ],
-        ),
-        body: Row(
-          children: [
-            Container(
-              width: 80,
-              color: Colors.grey.shade300,
-              child: FirestoreListView<Category>(
+          ),
+      body: Row(children: [
+        Container(
+            width: 80,
+            color: Colors.grey.shade300,
+            child: FirestoreListView<Category>(
                 query: categoryCollection,
                 itemBuilder: (context, snapshot) {
                   Category category = snapshot.data();
                   return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _title = category.catName!;
-                        selectedCategories = category.catName;
-                      });
-                    },
-                    child: Container(
-                      height: 70,
-                      color: selectedCategories == category.catName
-                          ? Colors.white
-                          : Colors.grey.shade300,
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                height: 30,
-                                child: CachedNetworkImage(
-                                  imageUrl: category.image!,
-                                  color: selectedCategories == category.catName
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.grey.shade700,
-                                ),
-                              ),
-                              Text(
-                                category.catName!,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: selectedCategories == category.catName
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.grey.shade700,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            MainCategoryWidget(
-              selectedCat: selectedCategories,
-            )
-          ],
-        ),
-      );
+                      onTap: () => setState(() {
+                            _title = category.catName!;
+                            selectedCategories = category.catName;
+                          }),
+                      child: Container(
+                          height: 70,
+                          color: selectedCategories == category.catName
+                              ? Colors.white
+                              : Colors.grey.shade300,
+                          child: Center(
+                              child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                            height: 30,
+                                            child: CachedNetworkImage(
+                                                imageUrl: category.image!,
+                                                color: selectedCategories ==
+                                                        category.catName
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : Colors.grey.shade700)),
+                                        Text(category.catName!,
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                color: selectedCategories ==
+                                                        category.catName
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : Colors.grey.shade700),
+                                            textAlign: TextAlign.center)
+                                      ])))));
+                })),
+        MainCategoryWidget(selectedCat: selectedCategories)
+      ]));
 }

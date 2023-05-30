@@ -6,7 +6,6 @@ import 'package:marketdo_app/firebase_services.dart';
 import 'package:marketdo_app/models/customer_model.dart';
 import 'package:marketdo_app/screens/login_screen.dart';
 import 'package:marketdo_app/screens/register_screen.dart';
-
 import 'main_screen.dart';
 
 class LandingScreen extends StatelessWidget {
@@ -25,9 +24,7 @@ class LandingScreen extends StatelessWidget {
               }
 
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
               if (!snapshot.data!.exists) {
                 return const RegistrationScreen();
