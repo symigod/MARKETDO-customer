@@ -483,10 +483,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 vendorID);
           },
           tileColor: Colors.green.shade900,
-          trailing: const Icon(Icons.add_shopping_cart, color: Colors.white),
+          leading: const Icon(Icons.add_shopping_cart, color: Colors.white),
           title: const Text('Add to Cart',
-              style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold))));
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          trailing: const Icon(Icons.check, color: Colors.white)));
 
   addToCart(String customerID, String productID, String vendorID) async {
     try {

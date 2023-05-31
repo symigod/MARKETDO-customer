@@ -93,7 +93,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     'email': _email.text,
                     'landMark': _landMark.text,
                     'approved': true,
-                    'time': DateTime.now(),
+                    'registeredOn': DateTime.now(),
                   }).then((value) {
                     EasyLoading.dismiss();
                     return Navigator.of(context).pushReplacement(

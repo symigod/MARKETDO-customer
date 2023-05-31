@@ -14,9 +14,9 @@ class VendorModel {
   final logo;
   final mobile;
   final pinCode;
+  final registeredOn;
   final shopImage;
   final state;
-  final registeredOn;
   final tin;
   final vendorID;
 
@@ -32,9 +32,9 @@ class VendorModel {
     required this.logo,
     required this.mobile,
     required this.pinCode,
+    required this.registeredOn,
     required this.shopImage,
     required this.state,
-    required this.registeredOn,
     required this.tin,
     required this.vendorID,
   });
@@ -53,9 +53,9 @@ class VendorModel {
       logo: data['logo'],
       mobile: data['mobile'],
       pinCode: data['pinCode'],
+      registeredOn: data['registeredOn'],
       shopImage: data['shopImage'],
       state: data['state'],
-      registeredOn: data['registeredOn'],
       tin: data['tin'],
       vendorID: data['vendorID'],
     );
@@ -73,9 +73,9 @@ class VendorModel {
         'logo': logo,
         'mobile': mobile,
         'pinCode': pinCode,
+        'registeredOn': registeredOn,
         'shopImage': shopImage,
         'state': state,
-        'registeredOn': registeredOn,
         'tin': tin,
         'vendorID': vendorID,
       };

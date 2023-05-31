@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:marketdo_app/screens/favorite_screen.dart';
 import 'login_screen.dart';
-import 'orders screen/order_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({Key? key}) : super(key: key);
@@ -50,7 +49,8 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(title: const Text('My Account'), actions: [
-        IconButton(icon: const Icon(Icons.logout), onPressed: () => logout())
+        IconButton(
+            icon: const Icon(Icons.exit_to_app), onPressed: () => logout())
       ]),
       body: SingleChildScrollView(
           child: FutureBuilder<DocumentSnapshot>(
@@ -138,12 +138,14 @@ class _AccountScreenState extends State<AccountScreen> {
                                     'My Orders (${snapshot.data!.docs.length})'),
                                 trailing: const Icon(Icons.arrow_forward_ios,
                                     size: 15),
-                                onTap: () => Navigator.push(
+                                onTap:
+                                    () {} /* => Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (BuildContext context) =>
                                             OrderScreen(
-                                                stream: orderStream()))));
+                                                stream: orderStream()))) */
+                                );
                           }),
                       StreamBuilder(
                           stream: favoriteStream(),

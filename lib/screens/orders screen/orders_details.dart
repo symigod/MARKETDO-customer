@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:marketdo_app/models/orders_model.dart';
+import 'package:marketdo_app/widgets/stream_widgets.dart';
 
 class OrderDetails extends StatelessWidget {
   final Timestamp time;
@@ -14,102 +14,104 @@ class OrderDetails extends StatelessWidget {
             title: const Text('Order Details',
                 style: TextStyle(color: Colors.white))),
         body: StreamBuilder(
-            stream: getSingleOrder(time),
+            // stream: getSingleOrder(time),
+
             builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return centerMessage(snapshot.error.toString());
-              } else {
-                if (!snapshot.hasData) {
-                  return centerMessage('NO RECORD FOUND!');
-                } else {
-                  return ListView.builder(
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        var address = snapshot.data![index].address;
-                        var customerName = snapshot.data![index].customerName;
-                        var landMark = snapshot.data![index].landMark;
-                        var mobile = snapshot.data![index].mobile;
-                        var orderStatus = snapshot.data![index].orderStatus;
-                        var paymentMethod = snapshot.data![index].paymentMethod;
-                        var products = snapshot.data![index].products.toList();
-                        var shippingFee = snapshot.data![index].shippingFee;
-                        var shippingMethod =
-                            snapshot.data![index].shippingMethod;
-                        var totalAmount = snapshot.data![index].totalAmount;
-                        var totalPrice = snapshot.data![index].totalPrice;
-                        var vendorName = snapshot.data![index].vendorName;
+          if (snapshot.hasError) {
+            return centerMessage(snapshot.error.toString());
+          } else {
+            if (!snapshot.hasData) {
+              return centerMessage('NO RECORD FOUND!');
+            } else {
+              return streamLoadingWidget();
+              // return ListView.builder(
+              //     itemCount: snapshot.data!.length,
+              //     itemBuilder: (context, index) {
+              //       var address = snapshot.data![index].address;
+              //       var customerName = snapshot.data![index].customerName;
+              //       var landMark = snapshot.data![index].landMark;
+              //       var mobile = snapshot.data![index].mobile;
+              //       var orderStatus = snapshot.data![index].orderStatus;
+              //       var paymentMethod = snapshot.data![index].paymentMethod;
+              //       var products = snapshot.data![index].products.toList();
+              //       var shippingFee = snapshot.data![index].shippingFee;
+              //       var shippingMethod =
+              //           snapshot.data![index].shippingMethod;
+              //       var totalAmount = snapshot.data![index].totalAmount;
+              //       var totalPrice = snapshot.data![index].totalPrice;
+              //       var vendorName = snapshot.data![index].vendorName;
 
-                        return Card(
-                            elevation: 10,
-                            margin: const EdgeInsets.all(5),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                side: const BorderSide(
-                                    color: Colors.black, width: 1)),
-                            child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Order Status: $orderStatus',
-                                          style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.red,
-                                              fontWeight: FontWeight.bold)),
-                                      const SizedBox(height: 10),
-                                      const Text('Customer Information',
-                                          style: TextStyle(
-                                              fontSize: 23,
-                                              fontWeight: FontWeight.bold)),
-                                      const SizedBox(height: 10),
-                                      Text('CUSTOMER NAME: $customerName',
-                                          style: const TextStyle(fontSize: 14)),
-                                      Text('MOBILE NUMBER: $mobile',
-                                          style: const TextStyle(fontSize: 14)),
-                                      Text('ADDRESS: $address',
-                                          style: const TextStyle(fontSize: 14)),
-                                      Text('LANDMARK: $landMark',
-                                          style: const TextStyle(fontSize: 14)),
-                                      const SizedBox(height: 10),
-                                      Text('VENDOR NAME: $vendorName',
-                                          style: const TextStyle(
-                                              fontSize: 22,
-                                              fontWeight: FontWeight.bold)),
-                                      const SizedBox(height: 10),
-                                      ListView.builder(
-                                          shrinkWrap: true,
-                                          itemCount: products.length,
-                                          itemBuilder: (context, index) {
-                                            var productImage = products[index]
-                                                    ['imageUrls']
-                                                .toString()
-                                                .replaceAll('[', '')
-                                                .replaceAll(']', '');
-                                            var productName =
-                                                products[index]['name'];
-                                            var regularPrice =
-                                                products[index]['regularPrice'];
+              //       return Card(
+              //           elevation: 10,
+              //           margin: const EdgeInsets.all(5),
+              //           shape: RoundedRectangleBorder(
+              //               borderRadius: BorderRadius.circular(10),
+              //               side: const BorderSide(
+              //                   color: Colors.black, width: 1)),
+              //           child: Padding(
+              //               padding: const EdgeInsets.all(10.0),
+              //               child: Column(
+              //                   crossAxisAlignment:
+              //                       CrossAxisAlignment.start,
+              //                   children: [
+              //                     Text('Order Status: $orderStatus',
+              //                         style: const TextStyle(
+              //                             fontSize: 14,
+              //                             color: Colors.red,
+              //                             fontWeight: FontWeight.bold)),
+              //                     const SizedBox(height: 10),
+              //                     const Text('Customer Information',
+              //                         style: TextStyle(
+              //                             fontSize: 23,
+              //                             fontWeight: FontWeight.bold)),
+              //                     const SizedBox(height: 10),
+              //                     Text('CUSTOMER NAME: $customerName',
+              //                         style: const TextStyle(fontSize: 14)),
+              //                     Text('MOBILE NUMBER: $mobile',
+              //                         style: const TextStyle(fontSize: 14)),
+              //                     Text('ADDRESS: $address',
+              //                         style: const TextStyle(fontSize: 14)),
+              //                     Text('LANDMARK: $landMark',
+              //                         style: const TextStyle(fontSize: 14)),
+              //                     const SizedBox(height: 10),
+              //                     Text('VENDOR NAME: $vendorName',
+              //                         style: const TextStyle(
+              //                             fontSize: 22,
+              //                             fontWeight: FontWeight.bold)),
+              //                     const SizedBox(height: 10),
+              //                     ListView.builder(
+              //                         shrinkWrap: true,
+              //                         itemCount: products.length,
+              //                         itemBuilder: (context, index) {
+              //                           var productImage = products[index]
+              //                                   ['imageUrls']
+              //                               .toString()
+              //                               .replaceAll('[', '')
+              //                               .replaceAll(']', '');
+              //                           var productName =
+              //                               products[index]['name'];
+              //                           var regularPrice =
+              //                               products[index]['regularPrice'];
 
-                                            return ListTile(
-                                                leading: Image.network(
-                                                    productImage.toString()),
-                                                title: Text(
-                                                    'PRODUCT NAME: $productName'),
-                                                subtitle: Text(
-                                                    'PRODUCT NAME: $regularPrice'));
-                                          }),
-                                      const SizedBox(height: 10),
-                                      Text('PAYMENT METHOD: $paymentMethod'),
-                                      Text('SHIPPING METHOD: $shippingMethod'),
-                                      Text('TOTAL PRICE: $totalPrice'),
-                                      Text('SHIPPING FEE: $shippingFee'),
-                                      Text('TOTAL AMOUNT: $totalAmount')
-                                    ])));
-                      });
-                }
-              }
-            })
+              //                           return ListTile(
+              //                               leading: Image.network(
+              //                                   productImage.toString()),
+              //                               title: Text(
+              //                                   'PRODUCT NAME: $productName'),
+              //                               subtitle: Text(
+              //                                   'PRODUCT NAME: $regularPrice'));
+              //                         }),
+              //                     const SizedBox(height: 10),
+              //                     Text('PAYMENT METHOD: $paymentMethod'),
+              //                     Text('SHIPPING METHOD: $shippingMethod'),
+              //                     Text('TOTAL PRICE: $totalPrice'),
+              //                     Text('SHIPPING FEE: $shippingFee'),
+              //                     Text('TOTAL AMOUNT: $totalAmount')
+              //                   ])));
+              //     });
+            }
+          }
+        })
         // body: SingleChildScrollView(
         //   // physics: const BouncingScrollPhysics(),
         //   child: Padding(

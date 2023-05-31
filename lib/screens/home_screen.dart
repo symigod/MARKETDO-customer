@@ -4,34 +4,44 @@ import 'package:marketdo_app/screens/search_screen.dart';
 import 'package:marketdo_app/widgets/banner_widget.dart';
 import 'package:marketdo_app/widgets/category/category_widget.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // List<Widget> screen = [homeWidget()];
+  @override
   Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.green.shade900,
-      appBar: AppBar(
-        // automaticallyImplyLeading: false,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text('Marketdo App',
-            style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
-        /* actions: [
-            IconButton(
-                icon: const Icon(IconlyLight.buy),
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            const CartScreen())))
-          ] */
-      ),
-      body: ListView(children: const [
+
+      // appBar: AppBar(
+      //   // automaticallyImplyLeading: false,
+      //   elevation: 0,
+      //   centerTitle: true,
+      //   title: const Text('Marketdo App',
+      //       style:
+      //           TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
+      //   /* actions: [
+      //     IconButton(
+      //         icon: const Icon(IconlyLight.buy),
+      //         onPressed: () => Navigator.push(
+      //             context,
+      //             MaterialPageRoute(
+      //                 builder: (BuildContext context) =>
+      //                     const CartScreen())))
+      //   ] */
+      // ),
+      body: homeWidget());
+
+  Widget homeWidget() => ListView(children: const [
         SearchWidget(),
         SizedBox(height: 10),
         BannerWidget(),
         CategoryWidget()
-      ]));
+      ]);
 }
 
 class SearchWidget extends StatefulWidget {

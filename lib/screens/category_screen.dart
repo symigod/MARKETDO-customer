@@ -2,8 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterfire_ui/firestore.dart';
 import 'package:marketdo_app/models/category_model.dart';
-
-import '../widgets/category/main_category_widget.dart';
+import 'package:marketdo_app/widgets/category/main_category_widget.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({Key? key}) : super(key: key);
@@ -18,31 +17,21 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-          title: Text(selectedCategories == null ? _title : selectedCategories!,
-              style: const TextStyle(color: Colors.white)),
+          backgroundColor: Colors.transparent,
           elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.black54)
-          // actions: [
-          //   IconButton(
-          //     icon: const Icon(IconlyLight.search),
-          //     onPressed: (){},
-          //   ),
-          //   IconButton(
-          //     icon: const Icon(IconlyLight.buy),
-          //     onPressed: (){},
-          //   ),
-          //   IconButton(
-          //     icon: const Icon(Icons.more_vert),
-          //     onPressed: (){},
-          //   ),
-          // ],
-          ),
+          title: Text(selectedCategories == null ? _title : selectedCategories!,
+              style: TextStyle(color: Colors.green.shade800)),
+          iconTheme: const IconThemeData(color: Colors.black54),
+          actions: [
+            IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+            // IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {}),
+            IconButton(icon: const Icon(Icons.more_vert), onPressed: () {})
+          ]),
       body: Row(children: [
-        Container(
+        SizedBox(
             width: 80,
-            color: Colors.grey.shade300,
+            // color: Colors.grey.shade300,
             child: FirestoreListView<Category>(
                 query: categoryCollection,
                 itemBuilder: (context, snapshot) {
@@ -52,11 +41,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
                             _title = category.catName!;
                             selectedCategories = category.catName;
                           }),
-                      child: Container(
+                      child: SizedBox(
                           height: 70,
-                          color: selectedCategories == category.catName
-                              ? Colors.white
-                              : Colors.grey.shade300,
+                          // color: selectedCategories == category.catName
+                          //     ? Colors.white
+                          //     : Colors.grey.shade300,
                           child: Center(
                               child: Padding(
                                   padding: const EdgeInsets.all(8.0),

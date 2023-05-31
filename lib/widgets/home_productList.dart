@@ -38,7 +38,7 @@ class HomeProductList extends StatelessWidget {
                               context,
                               PageRouteBuilder(
                                   transitionDuration:
-                                      const Duration(milliseconds: 500),
+                                      const Duration(seconds: 1),
                                   pageBuilder: (context, a1, a2) =>
                                       ProductDetailScreen(
                                           productID: product.productID))),
