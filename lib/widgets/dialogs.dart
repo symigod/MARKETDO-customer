@@ -1,5 +1,7 @@
 import 'package:clipboard/clipboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Widget confirmDialog(
@@ -33,6 +35,9 @@ Future<void> openURL(context, String url) async {
         builder: (_) => errorDialog(context, 'Cannot open "$url"'));
   }
 }
+
+String dateTimeToString(Timestamp timestamp) =>
+    DateFormat('MMM dd, yyyy').format(timestamp.toDate()).toString();
 
 void copyToClipboard(context, String copyText) =>
     FlutterClipboard.copy(copyText).then((value) => showSnackbar(context));

@@ -83,28 +83,24 @@ class _CartScreenState extends State<CartScreen> {
                                     if (vendorSnapshot.hasData) {
                                       DocumentSnapshot vendor =
                                           vendorSnapshot.data!;
-                                      return Center(
-                                          child: Padding(
-                                              padding: const EdgeInsets.all(10),
-                                              child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Text(vendor['businessName'],
-                                                        style: const TextStyle(
-                                                            color: Colors.white,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold)),
-                                                    GestureDetector(
-                                                        onTap: () =>
-                                                            deleteCart(cartID),
-                                                        child: const Icon(
-                                                            Icons.close,
-                                                            color:
-                                                                Colors.white))
-                                                  ])));
+                                      return ListTile(
+                                          leading: SizedBox(
+                                              height: 40,
+                                              width: 40,
+                                              child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(50),
+                                                  child: Image.network(
+                                                      vendor['logo']))),
+                                          title: Text(vendor['businessName'],
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold)),
+                                          trailing: IconButton(
+                                              onPressed: () =>
+                                                  deleteCart(cartID),
+                                              icon: const Icon(Icons.close,
+                                                  color: Colors.white)));
                                     }
                                     return streamEmptyWidget(
                                         'VENDOR NOT FOUND');
@@ -138,12 +134,16 @@ class _CartScreenState extends State<CartScreen> {
                                       String formattedPrice =
                                           'P ${regularPrice.toStringAsFixed(2)}';
                                       return ListTile(
+                                          dense: true,
                                           isThreeLine: true,
                                           leading: SizedBox(
                                               height: 40,
                                               width: 40,
-                                              child: Image.network(
-                                                  product['imageURL'])),
+                                              child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(50),
+                                                  child: Image.network(
+                                                      product['imageURL']))),
                                           title: Text(product['productName']),
                                           subtitle: RichText(
                                               text: TextSpan(
