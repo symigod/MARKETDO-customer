@@ -13,7 +13,7 @@ class BannerWidget extends StatefulWidget {
 
 class _BannerWidgetState extends State<BannerWidget> {
   final FirebaseService _service = FirebaseService();
-  double scrollPosition = 0;
+  int scrollPosition = 0;
   final List _bannerImage = [];
 
   @override
@@ -54,8 +54,8 @@ class _BannerWidgetState extends State<BannerWidget> {
                             itemBuilder: (BuildContext context, int index) =>
                                 Image.network(_bannerImage[index],
                                     fit: BoxFit.cover),
-                            onPageChanged: (val) => setState(
-                                () => scrollPosition = val.toDouble()))))),
+                            onPageChanged: (val) =>
+                                setState(() => scrollPosition = val))))),
         _bannerImage.isEmpty
             ? Container()
             : Positioned(
@@ -69,7 +69,7 @@ class DotsIndicatorWidget extends StatelessWidget {
   const DotsIndicatorWidget(
       {super.key, required this.scrollPosition, required this.itemList});
 
-  final double scrollPosition;
+  final int scrollPosition;
   final List itemList;
 
   @override

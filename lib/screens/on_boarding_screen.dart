@@ -118,7 +118,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             DotsIndicator(
                 dotsCount: 5,
-                position: scrollerPosition,
+                position: scrollerPosition.toInt(),
                 decorator: const DotsDecorator(activeColor: Colors.white)),
             scrollerPosition == 4
                 ? Padding(
