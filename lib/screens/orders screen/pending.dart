@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:marketdo_app/widgets/stream_widgets.dart';
+import 'package:marketdo_app/widgets/api_widgets.dart';
 
 class PendingOrdersScreen extends StatefulWidget {
   const PendingOrdersScreen({super.key});
@@ -19,15 +19,15 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
               isEqualTo: FirebaseAuth.instance.currentUser!.uid)
           .orderBy('orderedOn', descending: true)
           .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+      builder: (context, os) {
+        if (os.hasError) {
+          return errorWidget(os.error.toString());
         }
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+        if (os.connectionState == ConnectionState.waiting) {
+          return loadingWidget();
         }
-        if (snapshot.data!.docs.isNotEmpty) {
-          var order = snapshot.data!.docs;
+        if (os.data!.docs.isNotEmpty) {
+          var order = os.data!.docs;
           return ListView.builder(
               itemCount: order.length,
               itemBuilder: (context, index) {
@@ -40,18 +40,17 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                         .collection('vendor')
                         .where('vendorID', isEqualTo: orders['vendorID'])
                         .get(),
-                    builder: (context, cSnapshot) {
-                      if (cSnapshot.hasError) {
-                        return streamErrorWidget(cSnapshot.error.toString());
+                    builder: (context, vs) {
+                      if (vs.hasError) {
+                        return errorWidget(vs.error.toString());
                       }
-                      if (cSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return streamLoadingWidget();
+                      if (vs.connectionState == ConnectionState.waiting) {
+                        return loadingWidget();
                       }
-                      if (cSnapshot.data!.docs.isNotEmpty) {
-                        var vendor = cSnapshot.data!.docs[0];
+                      if (vs.data!.docs.isNotEmpty) {
+                        var vendor = vs.data!.docs[0];
                         return ListTile(
-                            onTap: () {},
+                            onTap: () => viewOrderDetails(orders['orderID']),
                             dense: true,
                             tileColor: tileColor,
                             leading: SizedBox(
@@ -73,10 +72,13 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                                     color: Colors.red,
                                     fontWeight: FontWeight.bold)));
                       }
-                      return streamEmptyWidget('VENDOR NOT FOUND');
+                      return emptyWidget('VENDOR NOT FOUND');
                     });
               });
         }
-        return const Center(child: Text('NO ORDERS YET'));
+        return emptyWidget('NO ORDERS YET');
       });
+
+  viewOrderDetails(String orderID) =>
+      showDialog(context: context, builder: (_) => AlertDialog());
 }

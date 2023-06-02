@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/models/product_model.dart';
 import 'package:marketdo_app/screens/product_details_screen.dart';
-import 'package:marketdo_app/widgets/stream_widgets.dart';
+import 'package:marketdo_app/widgets/api_widgets.dart';
+import 'package:marketdo_app/widgets/loading_indicator.dart';
 
 class HomeProductList extends StatelessWidget {
   const HomeProductList({super.key});
@@ -15,10 +16,10 @@ class HomeProductList extends StatelessWidget {
           stream: FirebaseFirestore.instance.collection('product').snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return streamErrorWidget(snapshot.error.toString());
+              return errorWidget(snapshot.error.toString());
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return streamLoadingWidget();
+              return loadingIndicator();
             }
             return GridView.builder(
                 shrinkWrap: true,

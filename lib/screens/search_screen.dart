@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/models/product_model.dart';
 import 'package:marketdo_app/screens/product_details_screen.dart';
-import 'package:marketdo_app/widgets/stream_widgets.dart';
+import 'package:marketdo_app/widgets/api_widgets.dart';
 
 class SearchScreen extends StatefulWidget {
   final String searchText;
@@ -28,13 +28,13 @@ class _SearchScreenState extends State<SearchScreen> {
                     ['${widget.searchText.toUpperCase()}\uf8ff']).snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return streamErrorWidget(snapshot.error.toString());
+                return errorWidget(snapshot.error.toString());
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return streamLoadingWidget();
+                return loadingWidget();
               }
               if (snapshot.data!.docs.isEmpty) {
-                return streamEmptyWidget('NO PRODUCTS FOUND');
+                return emptyWidget('NO PRODUCTS FOUND');
               }
               return GridView.builder(
                   shrinkWrap: true,

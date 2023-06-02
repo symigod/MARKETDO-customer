@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:marketdo_app/screens/product_details_screen.dart';
-import 'package:marketdo_app/widgets/stream_widgets.dart';
+import 'package:marketdo_app/widgets/api_widgets.dart';
 
 class FavoritesScreen extends StatefulWidget {
   final Stream stream;
@@ -22,13 +22,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 FirebaseFirestore.instance.collection('favorites').snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return streamErrorWidget(snapshot.error.toString());
+                return errorWidget(snapshot.error.toString());
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return streamLoadingWidget();
+                return loadingWidget();
               }
               if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
-                return streamEmptyWidget('NO FAVORITES YET');
+                return emptyWidget('NO FAVORITES YET');
               }
               return ListView.builder(
                   itemCount: snapshot.data!.docs.length,

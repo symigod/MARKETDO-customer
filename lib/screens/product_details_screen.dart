@@ -7,7 +7,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:marketdo_app/models/cart_model.dart';
 import 'package:marketdo_app/models/product_model.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
-import 'package:marketdo_app/widgets/stream_widgets.dart';
+import 'package:marketdo_app/widgets/api_widgets.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productID;
@@ -18,9 +18,6 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  // final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  // final FirebaseService _service = FirebaseService();
-  // final FirebaseAuth _auth = FirebaseAuth.instance;
   final store = GetStorage();
   ScrollController? _scrollController;
   int? pageNumber = 0;
@@ -54,12 +51,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     });
     super.initState();
   }
-
-  // getSize() {
-  //   if (widget.product!.size != null) {
-  //     setState(() => _selectedSize = widget.product!.size![0]);
-  //   }
-  // }
 
   Widget _sizedBox({double? height, double? width}) =>
       SizedBox(height: height ?? 0, width: width ?? 0);
@@ -125,13 +116,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return streamErrorWidget(snapshot.error.toString());
+                  return errorWidget(snapshot.error.toString());
                 }
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return streamLoadingWidget();
+                  return loadingWidget();
                 }
                 if (snapshot.data!.docs.isEmpty) {
-                  return streamEmptyWidget('NO PRODUCTS FOUND');
+                  return emptyWidget('NO PRODUCTS FOUND');
                 }
                 return ListView.builder(
                     itemCount: snapshot.data!.docs.length,
@@ -199,12 +190,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       .get(),
                                   builder: (context, vSnapshot) {
                                     if (vSnapshot.hasError) {
-                                      return streamErrorWidget(
+                                      return errorWidget(
                                           vSnapshot.error.toString());
                                     }
                                     if (vSnapshot.connectionState ==
                                         ConnectionState.waiting) {
-                                      return streamLoadingWidget();
+                                      return loadingWidget();
                                     }
                                     if (vSnapshot.data!.docs.isNotEmpty) {
                                       var vendor = vSnapshot.data!.docs[0];
@@ -230,8 +221,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         const Divider(height: 0, thickness: 1)
                                       ]);
                                     }
-                                    return streamEmptyWidget(
-                                        'VENDOR NOT FOUND');
+                                    return emptyWidget('VENDOR NOT FOUND');
                                   }),
                               // Row(children: [
                               //   Icon(IconlyBold.star,
@@ -478,22 +468,45 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           onTap: () async {
             showDialog(
                 context: context,
-                builder: (_) => StatefulBuilder(
-                    builder: (context, setState) => FutureBuilder(
-                        future: FirebaseFirestore.instance
-                            .collection('product')
-                            .where('productID', isEqualTo: widget.productID)
-                            .get(),
-                        builder: (context, snapshot) {
-                          double finalPrice = snapshot
-                                  .data!.docs[0]['regularPrice']
-                                  .toDouble() *
-                              kilograms;
+                builder: (_) => FutureBuilder(
+                    future: FirebaseFirestore.instance
+                        .collection('product')
+                        .where('productID', isEqualTo: widget.productID)
+                        .get(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return errorWidget(snapshot.error.toString());
+                      }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return loadingWidget();
+                      }
+                      if (snapshot.hasData) {
+                        var products = snapshot.data!.docs;
+                        var product = products[0];
+                        return StatefulBuilder(builder: (context, setState) {
+                          double regularPrice = product['regularPrice'];
+                          double finalPrice =
+                              regularPrice.toDouble() * kilograms;
                           return AlertDialog(
                               scrollable: true,
-                              title: Text(
-                                  'P ${snapshot.data!.docs[0]['regularPrice'].toStringAsFixed(2)} per ${snapshot.data!.docs[0]['unit']}',
-                                  textAlign: TextAlign.center),
+                              titlePadding: EdgeInsets.zero,
+                              title: Card(
+                                  color: Colors.green.shade800,
+                                  margin: EdgeInsets.zero,
+                                  shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(3),
+                                          topRight: Radius.circular(3))),
+                                  child: Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Text(
+                                        'P ${snapshot.data!.docs[0]['regularPrice'].toStringAsFixed(2)} per ${snapshot.data!.docs[0]['unit']}',
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center),
+                                  ))),
                               content: Column(children: [
                                 SizedBox(
                                     height: 150,
@@ -520,18 +533,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         ]),
                                         onChanged: (value) =>
                                             setState(() => kilograms = value))),
-                                const Divider(),
+                                const Divider(thickness: 1),
                                 Text('${kilograms.toStringAsFixed(2)} KG',
                                     textAlign: TextAlign.center),
-                                const Divider(),
-                                Text('= P ${finalPrice.toStringAsFixed(2)}',
+                                const Divider(thickness: 1),
+                                Text(
+                                    'TOTAL PAYMENT\nP ${numberToString(finalPrice)}',
                                     textAlign: TextAlign.center)
                               ]),
+                              actionsAlignment: MainAxisAlignment.spaceBetween,
                               actions: [
                                 TextButton(
                                     onPressed: () => Navigator.pop(context),
                                     child: const Text('CANCEL',
-                                        style: TextStyle(color: Colors.red))),
+                                        style: TextStyle(
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.bold))),
                                 TextButton(
                                     onPressed: () async {
                                       final vendorIDStream = FirebaseFirestore
@@ -550,9 +567,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           widget.productID,
                                           vendorID);
                                     },
-                                    child: const Text('OK'))
+                                    child: const Text('CONFIRM',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)))
                               ]);
-                        })));
+                        });
+                      }
+                      return emptyWidget('PRODUCT NOT FOUND');
+                    }));
           },
           tileColor: Colors.green.shade900,
           leading: const Icon(Icons.add_shopping_cart, color: Colors.white),
@@ -657,10 +679,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               .get(),
           builder: (context, s) {
             if (s.hasError) {
-              return streamErrorWidget(s.error.toString());
+              return errorWidget(s.error.toString());
             }
             if (s.connectionState == ConnectionState.waiting) {
-              return streamLoadingWidget();
+              return loadingWidget();
             }
             if (s.data!.docs.isNotEmpty) {
               var vendor = s.data!.docs[0];
@@ -710,7 +732,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         title: Text(vendor['businessName'],
                             style:
                                 const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('Vendor ID:\n${vendor['vendorID']}')),
+                        subtitle: FittedBox(
+                            child: Text('Vendor ID:\n${vendor['vendorID']}'))),
                     ListTile(
                         dense: true,
                         leading: const Icon(Icons.perm_phone_msg),
@@ -729,12 +752,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         title: Text('PIN CODE: ${vendor['pinCode']}'),
                         subtitle: Text(
                             'TIN: ${vendor['tin']}\nTAX REGISTERED: ${vendor['isTaxRegistered'] == true ? 'YES' : 'NO'}')),
-                    // ListTile(
-                    //     dense: true,
-                    //     leading: const Icon(Icons.date_range),
-                    //     title: const Text('REGISTERED ON:'),
-                    //     subtitle: Text(
-                    //         dateTimeToString(vendor['registeredOn'])))
+                    ListTile(
+                        dense: true,
+                        leading: const Icon(Icons.date_range),
+                        title: const Text('REGISTERED ON:'),
+                        subtitle:
+                            Text(dateTimeToString(vendor['registeredOn'])))
                   ]),
                   actions: [
                     TextButton(
@@ -742,6 +765,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         child: const Text('OK'))
                   ]);
             }
-            return streamEmptyWidget('VENDOR NOT FOUND');
+            return emptyWidget('VENDOR NOT FOUND');
           }));
 }

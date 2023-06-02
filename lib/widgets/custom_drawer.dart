@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:marketdo_app/models/customer_model.dart';
 import 'package:marketdo_app/screens/login_screen.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
-import 'package:marketdo_app/widgets/stream_widgets.dart';
+import 'package:marketdo_app/widgets/api_widgets.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
@@ -36,7 +36,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         future: fetchData(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return streamErrorWidget(snapshot.error.toString());
+            return errorWidget(snapshot.error.toString());
           }
           // if (snapshot.connectionState == ConnectionState.waiting) {
           //   return streamLoadingWidget();
@@ -141,7 +141,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   ])
                 ]));
           }
-          return streamEmptyWidget('VENDOR NOT FOUND');
+          return emptyWidget('VENDOR NOT FOUND');
         });
   }
 }

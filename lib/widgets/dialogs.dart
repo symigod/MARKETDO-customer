@@ -39,6 +39,8 @@ Future<void> openURL(context, String url) async {
 String dateTimeToString(Timestamp timestamp) =>
     DateFormat('MMM dd, yyyy').format(timestamp.toDate()).toString();
 
+String numberToString(double number) => NumberFormat('#,###.##').format(number);
+
 void copyToClipboard(context, String copyText) =>
     FlutterClipboard.copy(copyText).then((value) => showSnackbar(context));
 

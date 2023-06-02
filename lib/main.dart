@@ -8,10 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:marketdo_app/screens/on_boarding_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-// to generate id by date
-// String generateID(DateTime dateTime) =>
-//     dateTime.microsecondsSinceEpoch.toString();
-
 int marketDoGreen = 0xFF1B5E20;
 MaterialColor _marketDoGreen = MaterialColor(marketDoGreen, {
   50: const Color(0xFFE8F5E9),

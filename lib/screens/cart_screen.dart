@@ -5,7 +5,7 @@ import 'package:marketdo_app/models/order_model.dart';
 import 'package:marketdo_app/models/vendor_model.dart';
 import 'package:marketdo_app/screens/product_details_screen.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
-import 'package:marketdo_app/widgets/stream_widgets.dart';
+import 'package:marketdo_app/widgets/api_widgets.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -15,18 +15,14 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  CollectionReference cartsCollection =
-      FirebaseFirestore.instance.collection('carts');
-  CollectionReference vendorsCollection =
-      FirebaseFirestore.instance.collection('vendor');
-  CollectionReference productsCollection =
-      FirebaseFirestore.instance.collection('product');
-
-  Stream getCarts() => cartsCollection
+  Stream getCarts() => FirebaseFirestore.instance
+      .collection('carts')
       .where('customerID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
       .snapshots();
 
-  Stream<List<VendorModel>> getVendor(String vendorID) => vendorsCollection
+  Stream<List<VendorModel>> getVendor(String vendorID) => FirebaseFirestore
+      .instance
+      .collection('vendor')
       .where('vendorID', isEqualTo: vendorID)
       .snapshots()
       .map((vendor) =>
@@ -68,17 +64,18 @@ class _CartScreenState extends State<CartScreen> {
                                       topLeft: Radius.circular(5),
                                       topRight: Radius.circular(5))),
                               child: StreamBuilder(
-                                  stream: vendorsCollection
+                                  stream: FirebaseFirestore.instance
+                                      .collection('vendor')
                                       .doc(vendorID)
                                       .snapshots(),
                                   builder: (context, vendorSnapshot) {
                                     if (vendorSnapshot.hasError) {
-                                      return streamErrorWidget(
+                                      return errorWidget(
                                           vendorSnapshot.error.toString());
                                     }
                                     if (vendorSnapshot.connectionState ==
                                         ConnectionState.waiting) {
-                                      return streamLoadingWidget();
+                                      return loadingWidget();
                                     }
                                     if (vendorSnapshot.hasData) {
                                       DocumentSnapshot vendor =
@@ -102,19 +99,18 @@ class _CartScreenState extends State<CartScreen> {
                                               icon: const Icon(Icons.close,
                                                   color: Colors.white)));
                                     }
-                                    return streamEmptyWidget(
-                                        'VENDOR NOT FOUND');
+                                    return emptyWidget('VENDOR NOT FOUND');
                                   })),
                           FutureBuilder<List<DocumentSnapshot>>(
                               future: _fetchProducts(productIDs),
                               builder: (context, productsSnapshot) {
                                 if (productsSnapshot.hasError) {
-                                  return streamErrorWidget(
+                                  return errorWidget(
                                       productsSnapshot.error.toString());
                                 }
                                 if (productsSnapshot.connectionState ==
                                     ConnectionState.waiting) {
-                                  return streamLoadingWidget();
+                                  return loadingWidget();
                                 }
                                 if (productsSnapshot.hasData) {
                                   List products = productsSnapshot.data!;
@@ -201,19 +197,20 @@ class _CartScreenState extends State<CartScreen> {
                                             ]))
                                   ]);
                                 }
-                                return streamEmptyWidget('PRODUCTS NOT FOUND');
+                                return emptyWidget('PRODUCTS NOT FOUND');
                               })
                         ]));
                   });
             }
-            return streamEmptyWidget('CART EMPTY');
+            return emptyWidget('CART EMPTY');
           }));
 
   Future<List<DocumentSnapshot>> _fetchProducts(
       List<dynamic> productIDs) async {
     List<DocumentSnapshot> products = [];
     for (dynamic id in productIDs) {
-      DocumentSnapshot snapshot = await productsCollection.doc(id).get();
+      DocumentSnapshot snapshot =
+          await FirebaseFirestore.instance.collection('product').doc(id).get();
       if (snapshot.exists) {
         products.add(snapshot);
       }
@@ -361,7 +358,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                 stream: getVendor(widget.vendorID),
                                 builder: (context, snapshot) {
                                   if (snapshot.hasError) {
-                                    return streamErrorWidget(
+                                    return errorWidget(
                                         snapshot.error.toString());
                                   }
                                   if (snapshot.connectionState ==
@@ -450,7 +447,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                           subtitle: Text(vendor.email))
                                     ]);
                                   }
-                                  return streamEmptyWidget('VENDOR NOT FOUND');
+                                  return emptyWidget('VENDOR NOT FOUND');
                                 })
                           ]),
                           cardWidget(context, 'PRODUCTS', [
