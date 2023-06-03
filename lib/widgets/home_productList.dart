@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:marketdo_app/models/product_model.dart';
 import 'package:marketdo_app/screens/product_details_screen.dart';
 import 'package:marketdo_app/widgets/api_widgets.dart';
-import 'package:marketdo_app/widgets/loading_indicator.dart';
 
 class HomeProductList extends StatelessWidget {
   const HomeProductList({super.key});
@@ -13,13 +12,13 @@ class HomeProductList extends StatelessWidget {
   Widget build(BuildContext context) => Container(
       color: Colors.grey.shade200,
       child: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('product').snapshots(),
+          stream: FirebaseFirestore.instance.collection('products').snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return errorWidget(snapshot.error.toString());
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return loadingIndicator();
+              return loadingWidget();
             }
             return GridView.builder(
                 shrinkWrap: true,
@@ -35,14 +34,19 @@ class HomeProductList extends StatelessWidget {
                   return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: InkWell(
+                          // onTap: () => Navigator.push(
+                          //     context,
+                          //     PageRouteBuilder(
+                          //         transitionDuration:
+                          //             const Duration(seconds: 1),
+                          //         pageBuilder: (context, a1, a2) =>
+                          //             ProductDetailScreen(
+                          //                 productID: product.productID))),
                           onTap: () => Navigator.push(
                               context,
-                              PageRouteBuilder(
-                                  transitionDuration:
-                                      const Duration(seconds: 1),
-                                  pageBuilder: (context, a1, a2) =>
-                                      ProductDetailScreen(
-                                          productID: product.productID))),
+                              MaterialPageRoute(
+                                  builder: (_) => ProductDetailScreen(
+                                      productID: product.productID))),
                           child: Container(
                               padding: const EdgeInsets.all(8),
                               height: 80,

@@ -3,10 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/screens/login_screen.dart';
+import 'package:marketdo_app/screens/main_screen.dart';
 import 'package:marketdo_app/screens/register_screen.dart';
 import 'package:marketdo_app/widgets/api_widgets.dart';
-import 'package:marketdo_app/widgets/loading_indicator.dart';
-import 'main_screen.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({Key? key}) : super(key: key);
@@ -24,7 +23,7 @@ class LandingScreen extends StatelessWidget {
                 return errorWidget(snapshot.error.toString());
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return loadingIndicator();
+                return loadingWidget();
               }
               if (snapshot.hasData) {
                 Map<String, dynamic> customer =

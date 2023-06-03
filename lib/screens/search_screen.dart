@@ -22,7 +22,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: Text('Search results for "${widget.searchText}"'))),
         body: StreamBuilder(
             stream: FirebaseFirestore.instance
-                .collection('product')
+                .collection('products')
                 .orderBy('productName')
                 .startAt([widget.searchText.toUpperCase()]).endAt(
                     ['${widget.searchText.toUpperCase()}\uf8ff']).snapshots(),

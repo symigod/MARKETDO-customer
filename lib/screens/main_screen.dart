@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/screens/cart_screen.dart';
 import 'package:marketdo_app/screens/category_screen.dart';
+import 'package:marketdo_app/screens/favorite_screen.dart';
 import 'package:marketdo_app/screens/home_screen.dart';
 import 'package:marketdo_app/screens/orders%20screen/order_screen.dart';
 import 'package:marketdo_app/widgets/custom_drawer.dart';
@@ -25,7 +26,8 @@ class _MainScreenState extends State<MainScreen> {
     CategoryScreen(),
     // MessageScreen(),
     CartScreen(),
-    OrderScreen()
+    OrderScreen(),
+    FavoritesScreen()
   ];
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
@@ -114,7 +116,9 @@ class _MainScreenState extends State<MainScreen> {
                     ]),
                     label: 'Cart'),
                 const BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_bag), label: 'Orders')
+                    icon: Icon(Icons.shopping_bag), label: 'Orders'),
+                const BottomNavigationBarItem(
+                    icon: Icon(Icons.favorite), label: 'Favorites')
               ],
               currentIndex: _selectedIndex,
               selectedItemColor: Colors.yellow,

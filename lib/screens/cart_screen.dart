@@ -210,7 +210,7 @@ class _CartScreenState extends State<CartScreen> {
     List<DocumentSnapshot> products = [];
     for (dynamic id in productIDs) {
       DocumentSnapshot snapshot =
-          await FirebaseFirestore.instance.collection('product').doc(id).get();
+          await FirebaseFirestore.instance.collection('products').doc(id).get();
       if (snapshot.exists) {
         products.add(snapshot);
       }

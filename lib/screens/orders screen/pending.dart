@@ -80,5 +80,5 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
       });
 
   viewOrderDetails(String orderID) =>
-      showDialog(context: context, builder: (_) => AlertDialog());
+      showDialog(context: context, builder: (_) => const AlertDialog());
 }

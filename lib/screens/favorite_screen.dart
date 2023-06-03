@@ -1,12 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:marketdo_app/screens/product_details_screen.dart';
 import 'package:marketdo_app/widgets/api_widgets.dart';
 
 class FavoritesScreen extends StatefulWidget {
-  final Stream stream;
-  const FavoritesScreen({super.key, required this.stream});
+  const FavoritesScreen({super.key});
 
   @override
   State<FavoritesScreen> createState() => _FavoritesScreenState();
@@ -16,48 +15,98 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('My Favorites')),
+        appBar: AppBar(elevation: 0, toolbarHeight: 0),
         body: StreamBuilder(
-            stream:
-                FirebaseFirestore.instance.collection('favorites').snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return errorWidget(snapshot.error.toString());
+            stream: FirebaseFirestore.instance
+                .collection('favorites')
+                .where('customerID',
+                    isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                .snapshots(),
+            builder: (context, fs) {
+              if (fs.hasError) {
+                return errorWidget(fs.error.toString());
               }
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (fs.connectionState == ConnectionState.waiting) {
                 return loadingWidget();
               }
-              if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
-                return emptyWidget('NO FAVORITES YET');
+              if (fs.data!.docs.isNotEmpty) {
+                final favorite = fs.data!.docs;
+                return ListView.builder(
+                    itemCount: favorite.length,
+                    itemBuilder: (context, index) {
+                      return FutureBuilder(
+                          future: FirebaseFirestore.instance
+                              .collection('products')
+                              .where('productID',
+                                  isEqualTo: favorite[index]['productID'])
+                              .get(),
+                          builder: (context, ps) {
+                            if (ps.hasError) {
+                              return errorWidget(ps.error.toString());
+                            }
+                            if (ps.connectionState == ConnectionState.waiting) {
+                              return loadingWidget();
+                            }
+                            if (ps.data!.docs.isNotEmpty) {
+                              final product = ps.data!.docs[0];
+                              return ListTile(
+                                  dense: true,
+                                  onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => ProductDetailScreen(
+                                              productID:
+                                                  product['productID']))),
+                                  leading: SizedBox(
+                                      height: 40,
+                                      width: 40,
+                                      child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                          child: Image.network(product['imageURL'],
+                                              fit: BoxFit.cover))),
+                                  title: Text(product['productName']),
+                                  subtitle: Text(
+                                      'P ${product['regularPrice'].toDouble().toStringAsFixed(2)}',
+                                      style:
+                                          const TextStyle(color: Colors.red)),
+                                  trailing: SizedBox(
+                                      height: 40,
+                                      width: 40,
+                                      child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                          child: FutureBuilder(
+                                              future: FirebaseFirestore.instance
+                                                  .collection('vendor')
+                                                  .where('vendorID',
+                                                      isEqualTo:
+                                                          product['vendorID'])
+                                                  .get(),
+                                              builder: (context, vs) {
+                                                if (vs.hasError) {
+                                                  return errorWidget(
+                                                      ps.error.toString());
+                                                }
+                                                if (vs.connectionState ==
+                                                    ConnectionState.waiting) {
+                                                  return loadingWidget();
+                                                }
+                                                if (vs.data!.docs.isNotEmpty) {
+                                                  final vendor =
+                                                      vs.data!.docs[0];
+                                                  return Image.network(
+                                                      vendor['logo'],
+                                                      fit: BoxFit.cover);
+                                                }
+                                                return loadingWidget();
+                                              }))));
+                            }
+                            return emptyWidget('PRODUCT NOT FOUND');
+                          });
+                    });
               }
-              return ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final favorite = snapshot.data!.docs[index];
-                    final String imageUrls = favorite['imageUrls'];
-                    final String productName = favorite['productName'];
-                    final String description = favorite['description'];
-                    final double regularPrice = favorite['regularPrice'];
-                    return GestureDetector(
-                        onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ProductDetailScreen(
-                                    productID: favorite['productID']))),
-                        child: Card(
-                            child: ListTile(
-                                leading: CachedNetworkImage(
-                                    imageUrl: imageUrls,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) =>
-                                        const CircularProgressIndicator(),
-                                    errorWidget: (context, url, error) =>
-                                        const Icon(Icons.error)),
-                                title: Text(productName),
-                                subtitle: Text(description),
-                                trailing: Text(
-                                    'Price: \$${regularPrice.toStringAsFixed(2)}'))));
-                  });
+              return emptyWidget('NO FAVORITES YET');
             }));
   }
 }

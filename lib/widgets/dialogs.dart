@@ -41,6 +41,37 @@ String dateTimeToString(Timestamp timestamp) =>
 
 String numberToString(double number) => NumberFormat('#,###.##').format(number);
 
+Text decimalToFraction(double value, String unit, double fontSize) {
+  const int maxDenominator = 1000000;
+
+  int whole = value.floor();
+  double decimal = value - whole;
+
+  if (decimal == 0) {
+    return Text(whole.toString(), style: TextStyle(fontSize: fontSize));
+  }
+
+  int gcd(int a, int b) => b == 0 ? a : gcd(b, a % b);
+
+  int numerator = (decimal * maxDenominator).toInt();
+  int denominator = maxDenominator;
+
+  int greatestCommonDivisor = gcd(numerator, denominator);
+  numerator ~/= greatestCommonDivisor;
+  denominator ~/= greatestCommonDivisor;
+
+  return Text.rich(
+      TextSpan(children: [
+        TextSpan(text: '$whole ', style: TextStyle(fontSize: fontSize)),
+        TextSpan(
+            text: '$numerator/$denominator',
+            style: TextStyle(
+                fontSize: fontSize * 0.8, fontWeight: FontWeight.normal)),
+        TextSpan(text: ' $unit', style: TextStyle(fontSize: fontSize)),
+      ]),
+      style: const TextStyle(fontWeight: FontWeight.bold));
+}
+
 void copyToClipboard(context, String copyText) =>
     FlutterClipboard.copy(copyText).then((value) => showSnackbar(context));
 
