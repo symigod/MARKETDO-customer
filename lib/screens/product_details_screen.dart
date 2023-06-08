@@ -76,7 +76,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     if (querySnapshot.docs.isNotEmpty) {
       final batch = FirebaseFirestore.instance.batch();
-      querySnapshot.docs.forEach((doc) => batch.delete(doc.reference));
+      for (var doc in querySnapshot.docs) {
+        batch.delete(doc.reference);
+      }
       await batch.commit();
     } else {
       final favoriteData = FavoriteModel(
@@ -495,8 +497,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       var products = snapshot.data!.docs;
                       var product = products[0];
                       return StatefulBuilder(builder: (context, setState) {
-                        double regularPrice = product['regularPrice'];
-                        double finalPrice = regularPrice.toDouble() * kilograms;
+                        double regularPrice =
+                            product['regularPrice'].toDouble();
+                        double finalPrice = regularPrice * kilograms;
                         return AlertDialog(
                             scrollable: true,
                             titlePadding: EdgeInsets.zero,
@@ -611,15 +614,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       } else {
         final newCart = FirebaseFirestore.instance.collection('carts').doc();
         final cartData = CartModel(
-          cartID: newCart.id,
-          customerID: customerID,
-          productIDs: [productID],
-          vendorID: vendorID,
-        );
+            cartID: newCart.id,
+            customerID: customerID,
+            productIDs: [productID],
+            vendorID: vendorID);
         await newCart.set(cartData.toFirestore()).then((value) => showDialog(
-            context: context,
-            builder: (builder) =>
-                successDialog(context, 'New product added to cart!')));
+                context: context,
+                builder: (builder) =>
+                    successDialog(context, 'New product added to cart!'))
+            .then((value) => Navigator.pop(context)));
       }
     } catch (e) {
       errorDialog(context, e.toString());
@@ -647,9 +650,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           FirebaseFirestore.instance.collection('carts').doc(cart.id).update({
             'productIDs': productIDs,
           }).then((value) => showDialog(
-              context: context,
-              builder: (_) =>
-                  successDialog(context, 'Product added to cart!')));
+                  context: context,
+                  builder: (_) =>
+                      successDialog(context, 'Product added to cart!'))
+              .then((value) => Navigator.pop(context)));
         }
       });
     } catch (e) {
@@ -753,8 +757,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ListTile(
                         dense: true,
                         leading: const Icon(Icons.location_on),
-                        title: Text(
-                            '${vendor['city']}, ${vendor['state']}, ${vendor['country']}'),
+                        title: Text(vendor['address']),
                         subtitle: Text(vendor['landMark'])),
                     ListTile(
                         dense: true,
