@@ -136,8 +136,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   fontWeight: FontWeight.bold)),
                           ListTile(
                               dense: true,
-                              title: Text(product.description),
-                              subtitle: Text(product.otherDetails),
+                              title: Text(product.category),
+                              subtitle: Text(product.description),
                               trailing: IconButton(
                                   icon: StreamBuilder(
                                       stream: FirebaseFirestore.instance

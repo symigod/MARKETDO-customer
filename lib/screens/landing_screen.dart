@@ -1,8 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:marketdo_app/screens/login_screen.dart';
 import 'package:marketdo_app/screens/main_screen.dart';
 import 'package:marketdo_app/screens/register_screen.dart';
 import 'package:marketdo_app/widgets/api_widgets.dart';
@@ -26,8 +24,8 @@ class LandingScreen extends StatelessWidget {
                 return loadingWidget();
               }
               if (snapshot.hasData) {
-                Map<String, dynamic> customer =
-                    snapshot.data!.data() as Map<String, dynamic>;
+                // Map<String, dynamic> customer =
+                //     snapshot.data!.data() as Map<String, dynamic>;
                 return const MainScreen();
                 // if (customer['isApproved'] == true) {
                 //   return const MainScreen();

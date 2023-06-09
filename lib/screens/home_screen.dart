@@ -15,8 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // List<Widget> screen = [homeWidget()];
   @override
   Widget build(BuildContext context) => Scaffold(
-      backgroundColor: Colors.green.shade900,
-
+      backgroundColor: Colors.green,
       // appBar: AppBar(
       //   // automaticallyImplyLeading: false,
       //   elevation: 0,
@@ -68,11 +67,9 @@ class _SearchWidgetState extends State<SearchWidget> {
                         decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
-                            border: InputBorder.none,
                             contentPadding:
                                 const EdgeInsets.fromLTRB(8, 5, 8, 0),
                             hintText: 'Search in Marketdo App',
-                            // hintStyle: const TextStyle(color: Colors.grey),
                             suffixIcon: GestureDetector(
                                 onTap: () => search(),
                                 child: const Icon(Icons.search, size: 20))))))),

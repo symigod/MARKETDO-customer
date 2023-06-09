@@ -21,6 +21,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
                     fontSize: 20))),
+        HomeProductList()
         // Padding(
         //     padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
         //     child: SizedBox(
@@ -60,7 +61,6 @@ class _CategoryWidgetState extends State<CategoryWidget> {
         //                           const MainScreen(index: 1))),
         //               icon: const Icon(IconlyLight.arrowDown))
         //         ]))),
-        HomeProductList()
       ]);
 }
 

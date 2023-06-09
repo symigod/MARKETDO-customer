@@ -57,12 +57,10 @@ class HomeProductList extends StatelessWidget {
                                     child: SizedBox(
                                         height: 90,
                                         width: 90,
-                                        child: Hero(
-                                            tag: product.imageURL,
-                                            child: CachedNetworkImage(
-                                              imageUrl: product.imageURL,
-                                              fit: BoxFit.cover,
-                                            )))),
+                                        child: CachedNetworkImage(
+                                          imageUrl: product.imageURL,
+                                          fit: BoxFit.cover,
+                                        ))),
                                 const SizedBox(height: 10),
                                 Text(product.productName,
                                     textAlign: TextAlign.center,
