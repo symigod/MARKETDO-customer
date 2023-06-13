@@ -2,10 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:marketdo_app/models/customer_model.dart';
-import 'package:marketdo_app/screens/login_screen.dart';
+import 'package:marketdo_app/firebase.services.dart';
+import 'package:marketdo_app/models/customer.model.dart';
+import 'package:marketdo_app/screens/authentication/login.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
-import 'package:marketdo_app/widgets/api_widgets.dart';
+import 'package:marketdo_app/widgets/snapshots.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
@@ -16,10 +17,7 @@ class CustomDrawer extends StatefulWidget {
 
 class _CustomDrawerState extends State<CustomDrawer> {
   Future<CustomerModel> fetchData() async {
-    DocumentSnapshot snapshot = await FirebaseFirestore.instance
-        .collection('customers')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .get();
+    DocumentSnapshot snapshot = await customersCollection.doc(authID).get();
     return CustomerModel.fromFirestore(snapshot);
   }
 

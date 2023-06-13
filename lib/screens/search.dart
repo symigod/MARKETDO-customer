@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:marketdo_app/models/product_model.dart';
-import 'package:marketdo_app/screens/product_details_screen.dart';
-import 'package:marketdo_app/widgets/api_widgets.dart';
+import 'package:marketdo_app/firebase.services.dart';
+import 'package:marketdo_app/models/product.model.dart';
+import 'package:marketdo_app/screens/products/details.product.dart';
+import 'package:marketdo_app/widgets/snapshots.dart';
 
 class SearchScreen extends StatefulWidget {
   final String searchText;
@@ -21,8 +21,7 @@ class _SearchScreenState extends State<SearchScreen> {
             title: FittedBox(
                 child: Text('Search results for "${widget.searchText}"'))),
         body: StreamBuilder(
-            stream: FirebaseFirestore.instance
-                .collection('products')
+            stream: productsCollection
                 .orderBy('productName')
                 .startAt([widget.searchText.toUpperCase()]).endAt(
                     ['${widget.searchText.toUpperCase()}\uf8ff']).snapshots(),

@@ -1,8 +1,8 @@
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:marketdo_app/firebase_services.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:marketdo_app/firebase.services.dart';
 
 class BannerWidget extends StatefulWidget {
   const BannerWidget({Key? key}) : super(key: key);
@@ -12,7 +12,6 @@ class BannerWidget extends StatefulWidget {
 }
 
 class _BannerWidgetState extends State<BannerWidget> {
-  final FirebaseService _service = FirebaseService();
   int scrollPosition = 0;
   final List _bannerImage = [];
 
@@ -22,13 +21,12 @@ class _BannerWidgetState extends State<BannerWidget> {
     super.initState();
   }
 
-  getBanners() {
-    return _service.homeBanner.get().then((QuerySnapshot querySnapshot) {
-      for (var doc in querySnapshot.docs) {
-        setState(() => _bannerImage.add(doc['image']));
-      }
-    });
-  }
+  getBanners() =>
+      homeBannerCollection.get().then((QuerySnapshot querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          setState(() => _bannerImage.add(doc['image']));
+        }
+      });
 
   @override
   Widget build(BuildContext context) => Stack(children: [

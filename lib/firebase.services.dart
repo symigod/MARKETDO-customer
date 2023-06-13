@@ -5,22 +5,25 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
-class FirebaseService {
-  User? user = FirebaseAuth.instance.currentUser;
-  CollectionReference customer =
-      FirebaseFirestore.instance.collection('customers');
-  CollectionReference homeBanner =
-      FirebaseFirestore.instance.collection('homeBanner');
-  CollectionReference brandAd =
-      FirebaseFirestore.instance.collection('brandAd');
-  CollectionReference categories =
-      FirebaseFirestore.instance.collection('categories');
-  CollectionReference mainCategories =
-      FirebaseFirestore.instance.collection('mainCategories');
-  CollectionReference subCategories =
-      FirebaseFirestore.instance.collection('subCategories');
-  CollectionReference orders = FirebaseFirestore.instance.collection('orders');
+String? authID = FirebaseAuth.instance.currentUser!.uid;
+CollectionReference cartsCollection =
+    FirebaseFirestore.instance.collection('carts');
+CollectionReference categoriesCollection =
+    FirebaseFirestore.instance.collection('categories');
+CollectionReference customersCollection =
+    FirebaseFirestore.instance.collection('customers');
+CollectionReference favoritesCollection =
+    FirebaseFirestore.instance.collection('favorites');
+CollectionReference homeBannerCollection =
+    FirebaseFirestore.instance.collection('homeBanner');
+CollectionReference ordersCollection =
+    FirebaseFirestore.instance.collection('orders');
+CollectionReference productsCollection =
+    FirebaseFirestore.instance.collection('products');
+CollectionReference vendorsCollection =
+    FirebaseFirestore.instance.collection('vendors');
 
+class FirebaseService {
   static var instance;
 
   Future<String> uploadImage(XFile? file, String? reference) async {
@@ -35,15 +38,15 @@ class FirebaseService {
 
   Future<void> addCustomer({Map<String, dynamic>? data}) {
     // Call the user's CollectionReference to add a new user
-    return customer
-        .doc(user!.uid)
+    return customersCollection
+        .doc(authID)
         .set(data)
         .then((value) => print("User Added"));
     // .catchError((error) => print("Failed to add user: $error"));
   }
 
   Future<void> addOrder({required Map<String, dynamic> data}) {
-    return orders.add(data).then((value) => print("Order added"));
+    return ordersCollection.add(data).then((value) => print("Order added"));
   }
 
   String formattedNumber(number) {

@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:marketdo_app/screens/login_screen.dart';
-import 'package:marketdo_app/screens/main_screen.dart';
+import 'package:marketdo_app/screens/authentication/login.dart';
+import 'package:marketdo_app/screens/main.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:marketdo_app/screens/on_boarding_screen.dart';
+import 'package:marketdo_app/screens/authentication/onboarding.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 int marketDoGreen = 0xFF1B5E20;

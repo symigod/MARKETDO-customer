@@ -1,8 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:marketdo_app/screens/product_details_screen.dart';
-import 'package:marketdo_app/widgets/api_widgets.dart';
+import 'package:marketdo_app/firebase.services.dart';
+import 'package:marketdo_app/screens/products/details.product.dart';
+import 'package:marketdo_app/widgets/snapshots.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -17,10 +16,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
         appBar: AppBar(elevation: 0, toolbarHeight: 0),
         body: StreamBuilder(
-            stream: FirebaseFirestore.instance
-                .collection('favorites')
-                .where('customerID',
-                    isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+            stream: favoritesCollection
+                .where('customerID', isEqualTo: authID)
                 .snapshots(),
             builder: (context, fs) {
               if (fs.hasError) {
@@ -35,8 +32,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     itemCount: favorite.length,
                     itemBuilder: (context, index) {
                       return FutureBuilder(
-                          future: FirebaseFirestore.instance
-                              .collection('products')
+                          future: productsCollection
                               .where('productID',
                                   isEqualTo: favorite[index]['productID'])
                               .get(),
@@ -77,8 +73,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                           borderRadius:
                                               BorderRadius.circular(50),
                                           child: FutureBuilder(
-                                              future: FirebaseFirestore.instance
-                                                  .collection('vendor')
+                                              future: vendorsCollection
                                                   .where('vendorID',
                                                       isEqualTo:
                                                           product['vendorID'])

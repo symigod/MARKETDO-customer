@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:marketdo_app/firebase.services.dart';
 
 class OrdersHistoryScreen extends StatefulWidget {
   const OrdersHistoryScreen({super.key});
@@ -12,10 +12,8 @@ class OrdersHistoryScreen extends StatefulWidget {
 class _OrdersHistoryScreenState extends State<OrdersHistoryScreen> {
   @override
   Widget build(BuildContext context) => StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection('orders')
-          .where('customerID',
-              isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+      stream: ordersCollection
+          .where('customerID', isEqualTo: authID)
           .where('orderStatus', isEqualTo: 'delivered')
           .orderBy('orderedOn', descending: true)
           .snapshots(),

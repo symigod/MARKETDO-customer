@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterfire_ui/auth.dart';
-import 'package:marketdo_app/screens/landing_screen.dart';
+import 'package:marketdo_app/screens/authentication/landing.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String id = 'login-screen';

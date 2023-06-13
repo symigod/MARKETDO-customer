@@ -1,14 +1,15 @@
 import 'package:awesome_number_picker/awesome_number_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:marketdo_app/models/cart_model.dart';
-import 'package:marketdo_app/models/favorite_model.dart';
-import 'package:marketdo_app/models/product_model.dart';
+import 'package:marketdo_app/firebase.services.dart';
+import 'package:marketdo_app/models/cart.model.dart';
+import 'package:marketdo_app/models/favorite.model.dart';
+import 'package:marketdo_app/models/product.model.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
-import 'package:marketdo_app/widgets/api_widgets.dart';
+import 'package:marketdo_app/widgets/snapshots.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productID;
@@ -66,12 +67,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String fraction = '';
 
   Future<void> addToFavorites() async {
-    final favoritesCollection =
-        FirebaseFirestore.instance.collection('favorites');
     final newFavorite = favoritesCollection.doc();
     final querySnapshot = await favoritesCollection
         .where('productID', isEqualTo: widget.productID)
-        .where('customerID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where('customerID', isEqualTo: authID)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -82,7 +81,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       await batch.commit();
     } else {
       final favoriteData = FavoriteModel(
-          customerID: FirebaseAuth.instance.currentUser!.uid,
+          customerID: authID,
           favoriteID: newFavorite.id,
           productID: widget.productID);
       await newFavorite.set(favoriteData.toFirestore());
@@ -96,8 +95,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           : null,
       body: SafeArea(
           child: StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection('products')
+              stream: productsCollection
                   .where('productID', isEqualTo: widget.productID)
                   .snapshots(),
               builder: (context, snapshot) {
@@ -126,27 +124,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     width: MediaQuery.of(context).size.width,
                                     child: ClipRRect(
                                         borderRadius: BorderRadius.circular(5),
-                                        child:
-                                            Image.network(product.imageURL))))),
+                                        child: CachedNetworkImage(
+                                            imageUrl: product.imageURL,
+                                            fit: BoxFit.cover))))),
                         Column(children: [
-                          Text(product.productName,
-                              style: TextStyle(
-                                  color: Colors.green.shade900,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold)),
                           ListTile(
                               dense: true,
+                              leading: const Icon(Icons.info),
+                              title: Text(product.productName),
+                              subtitle: Text(product.description)),
+                          const Divider(height: 0, thickness: 1),
+                          ListTile(
+                              dense: true,
+                              leading: const Icon(Icons.category),
                               title: Text(product.category),
                               subtitle: Text(product.description),
                               trailing: IconButton(
                                   icon: StreamBuilder(
-                                      stream: FirebaseFirestore.instance
-                                          .collection('favorites')
+                                      stream: favoritesCollection
                                           .where('productID',
                                               isEqualTo: widget.productID)
                                           .where('customerID',
-                                              isEqualTo: FirebaseAuth
-                                                  .instance.currentUser!.uid)
+                                              isEqualTo: authID)
                                           .snapshots(),
                                       builder: (context, fs) {
                                         if (fs.hasError) {
@@ -180,6 +179,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           const Divider(height: 0, thickness: 1),
                           ListTile(
                               dense: true,
+                              leading: const Icon(Icons.payments),
                               title:
                                   Text('Regular Price (per ${product.unit})'),
                               trailing: Text(
@@ -190,7 +190,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           const Divider(height: 0, thickness: 1),
                           ListTile(
                               dense: true,
-                              title: const Text('Shipping Fee'),
+                              leading: const Icon(Icons.delivery_dining),
+                              title: const Text('Delivery Fee'),
                               trailing: Text(
                                   'P ${product.shippingCharge.toStringAsFixed(2)}',
                                   style: const TextStyle(
@@ -198,8 +199,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       fontWeight: FontWeight.bold))),
                           const Divider(height: 0, thickness: 1),
                           FutureBuilder(
-                              future: FirebaseFirestore.instance
-                                  .collection('vendor')
+                              future: vendorsCollection
                                   .where('vendorID',
                                       isEqualTo: product.vendorID)
                                   .get(),
@@ -236,242 +236,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 }
                                 return emptyWidget('VENDOR NOT FOUND');
                               }),
-                          // Row(children: [
-                          //   Icon(IconlyBold.star,
-                          //       color: Theme.of(context).primaryColor,
-                          //       size: 14),
-                          //   Icon(IconlyBold.star,
-                          //       color: Theme.of(context).primaryColor,
-                          //       size: 14),
-                          //   Icon(IconlyBold.star,
-                          //       color: Theme.of(context).primaryColor,
-                          //       size: 14),
-                          //   Icon(IconlyBold.star,
-                          //       color: Theme.of(context).primaryColor,
-                          //       size: 14),
-                          //   Icon(IconlyBold.star,
-                          //       color: Theme.of(context).primaryColor,
-                          //       size: 14),
-                          //   _sizedBox(width: 4),
-                          //   const Text('(5)',
-                          //       style: TextStyle(fontSize: 12))
-                          // ]),
-                          // _sizedBox(height: 10),
-                          // if (product.size != 0)
-                          //   Column(
-                          //       crossAxisAlignment:
-                          //           CrossAxisAlignment.start,
-                          //       children: [
-                          //         _sizedBox(height: 10),
-                          //         _headText('Variations'),
-                          // SizedBox(
-                          //     height: 50,
-                          //     child: ListView(
-                          //         scrollDirection:
-                          //             Axis.horizontal,
-                          //         children: product.size
-                          //             .map((e) {
-                          //           return Padding(
-                          //               padding:
-                          //                   const EdgeInsets
-                          //                       .all(8),
-                          //               child:
-                          //                   OutlinedButton(
-                          //                       style:
-                          //                           ButtonStyle(
-                          //                         backgroundColor: MaterialStateProperty.all(_selectedSize == e
-                          //                             ? Theme.of(context)
-                          //                                 .primaryColor
-                          //                             : Colors
-                          //                                 .white),
-                          //                       ),
-                          //                       onPressed: () =>
-                          //                           setState(() =>
-                          //                               _selectedSize =
-                          //                                   e),
-                          //                       child: Text(
-                          //                           e,
-                          //                           style: TextStyle(
-                          //                               color: _selectedSize == e
-                          //                                   ? Colors.white
-                          //                                   : Colors.black))));
-                          //         }).toList()))
-                          // ]),
-                          // _divider(),
-                          // InkWell(
-                          //     onTap: () => showModalBottomSheet(
-                          //         context: context,
-                          //         builder: (context) => ProductBottomSheet(
-                          //             productID: product.productID)),
-                          //     child: Padding(
-                          //         padding: const EdgeInsets.only(
-                          //             top: 6, bottom: 6),
-                          //         child: Row(
-                          //             mainAxisAlignment:
-                          //                 MainAxisAlignment.spaceBetween,
-                          //             children: [
-                          //               _headText('Specifications'),
-                          //               const Icon(IconlyLight.arrowRight2,
-                          //                   size: 14)
-                          //             ]))),
-                          // _divider(),
-                          // Row(
-                          //     crossAxisAlignment: CrossAxisAlignment.start,
-                          //     children: [
-                          //       Expanded(
-                          //           flex: 2, child: _headText('Delivery')),
-                          //       Expanded(
-                          //           flex: 3,
-                          //           child: Column(
-                          //               crossAxisAlignment:
-                          //                   CrossAxisAlignment.start,
-                          //               children: [
-                          //                 InkWell(
-                          //                     onTap: () {},
-                          //                     child: StreamBuilder<
-                          //                             DocumentSnapshot>(
-                          //                         stream: FirebaseFirestore
-                          //                             .instance
-                          //                             .collection(
-                          //                                 'customers')
-                          //                             .doc(FirebaseAuth
-                          //                                 .instance
-                          //                                 .currentUser!
-                          //                                 .uid)
-                          //                             .snapshots(),
-                          //                         builder:
-                          //                             (context, snapshot) {
-                          //                           if (snapshot.hasError) {
-                          //                             return streamErrorWidget(
-                          //                                 snapshot.error
-                          //                                     .toString());
-                          //                           }
-                          //                           if (snapshot
-                          //                                   .connectionState ==
-                          //                               ConnectionState
-                          //                                   .waiting) {
-                          //                             return streamLoadingWidget();
-                          //                           }
-                          //                           String? address =
-                          //                               snapshot.data?.get(
-                          //                                   'address');
-                          //                           return Row(
-                          //                               mainAxisSize:
-                          //                                   MainAxisSize
-                          //                                       .min,
-                          //                               children: [
-                          //                                 Flexible(
-                          //                                     child: Text(
-                          //                                         address ??
-                          //                                             'Delivery address not set',
-                          //                                         maxLines:
-                          //                                             2,
-                          //                                         overflow:
-                          //                                             TextOverflow
-                          //                                                 .ellipsis,
-                          //                                         style: TextStyle(
-                          //                                             fontSize:
-                          //                                                 14,
-                          //                                             color: address != null
-                          //                                                 ? Colors.black
-                          //                                                 : Colors.red))),
-                          //                                 Icon(
-                          //                                     IconlyLight
-                          //                                         .location,
-                          //                                     size: 16,
-                          //                                     color: address !=
-                          //                                             null
-                          //                                         ? Colors
-                          //                                             .black
-                          //                                         : Colors
-                          //                                             .red)
-                          //                               ]);
-                          //                         })),
-                          //                 _sizedBox(height: 6),
-                          //                 const Text(
-                          //                     'Home Delivery 1-2 day(s)',
-                          //                     style:
-                          //                         TextStyle(fontSize: 14)),
-                          //                 Text(
-                          //                     'Delivery charge: ${product.isShipCharged ? 'Rs.${product.isShipCharged}' : 'Free'}',
-                          //                     style: const TextStyle(
-                          //                         color: Colors.grey,
-                          //                         fontSize: 14))
-                          //               ]))
-                          //     ]),
-                          // _divider(),
-                          // Row(
-                          //     mainAxisAlignment:
-                          //         MainAxisAlignment.spaceBetween,
-                          //     children: [
-                          //       _headText('Rating and Review (10)'),
-                          //       const Text('View all',
-                          //           style: TextStyle(color: Colors.red))
-                          //     ]),
-                          // _sizedBox(height: 10),
-                          // Row(
-                          //     mainAxisAlignment:
-                          //         MainAxisAlignment.spaceBetween,
-                          //     children: [
-                          //       const Text('Elvie deligero - 11 Feb 2023',
-                          //           style: TextStyle(
-                          //               color: Colors.grey, fontSize: 12)),
-                          //       Row(children: [
-                          //         Icon(IconlyBold.star,
-                          //             size: 12,
-                          //             color:
-                          //                 Theme.of(context).primaryColor),
-                          //         Icon(IconlyBold.star,
-                          //             size: 12,
-                          //             color:
-                          //                 Theme.of(context).primaryColor),
-                          //         Icon(IconlyBold.star,
-                          //             size: 12,
-                          //             color:
-                          //                 Theme.of(context).primaryColor),
-                          //         Icon(IconlyBold.star,
-                          //             size: 12,
-                          //             color:
-                          //                 Theme.of(context).primaryColor),
-                          //         Icon(IconlyLight.star,
-                          //             size: 12,
-                          //             color: Theme.of(context).primaryColor)
-                          //       ])
-                          //     ]),
-                          // const Text(
-                          //     'Good product, good quality\nOn time delivery'),
-                          // _sizedBox(height: 20),
-                          // Row(
-                          //     mainAxisAlignment:
-                          //         MainAxisAlignment.spaceBetween,
-                          //     children: [
-                          //       const Text('Elvie deligero - 11 Feb 2023',
-                          //           style: TextStyle(
-                          //               color: Colors.grey, fontSize: 12)),
-                          //       Row(children: [
-                          //         Icon(IconlyBold.star,
-                          //             size: 12,
-                          //             color:
-                          //                 Theme.of(context).primaryColor),
-                          //         Icon(IconlyBold.star,
-                          //             size: 12,
-                          //             color:
-                          //                 Theme.of(context).primaryColor),
-                          //         Icon(IconlyBold.star,
-                          //             size: 12,
-                          //             color:
-                          //                 Theme.of(context).primaryColor),
-                          //         Icon(IconlyBold.star,
-                          //             size: 12,
-                          //             color:
-                          //                 Theme.of(context).primaryColor),
-                          //         Icon(IconlyLight.star,
-                          //             size: 12,
-                          //             color: Theme.of(context).primaryColor)
-                          //       ])
-                          //     ]),
-                          // const Text(
-                          //     'Good product, good quality. On time delivery'),
                           const SizedBox(height: 100)
                         ]),
                       ]));
@@ -482,8 +246,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               barrierDismissible: false,
               context: context,
               builder: (_) => FutureBuilder(
-                  future: FirebaseFirestore.instance
-                      .collection('products')
+                  future: productsCollection
                       .where('productID', isEqualTo: widget.productID)
                       .get(),
                   builder: (context, snapshot) {
@@ -567,9 +330,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           fontWeight: FontWeight.bold))),
                               TextButton(
                                   onPressed: () async {
-                                    final vendorIDStream = FirebaseFirestore
-                                        .instance
-                                        .collection('products')
+                                    final vendorIDStream = productsCollection
                                         .where('productID',
                                             isEqualTo: widget.productID)
                                         .snapshots();
@@ -578,9 +339,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     final vendorID =
                                         vendorIDDocument.docs.first['vendorID'];
                                     addToCart(
-                                        FirebaseAuth.instance.currentUser!.uid,
-                                        widget.productID,
-                                        vendorID);
+                                        authID, widget.productID, vendorID);
                                   },
                                   child: const Text('CONFIRM',
                                       style: TextStyle(
@@ -597,12 +356,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           trailing: const Icon(Icons.check, color: Colors.white)));
 
-  addToCart(String customerID, String productID, String vendorID) async {
+  addToCart(String? customerID, String productID, String vendorID) async {
     try {
-      final checkVendorID = await FirebaseFirestore.instance
-          .collection('carts')
-          .where('vendorID', isEqualTo: vendorID)
-          .get();
+      final checkVendorID =
+          await cartsCollection.where('vendorID', isEqualTo: vendorID).get();
       final List<QueryDocumentSnapshot> documents = checkVendorID.docs;
       var checkedVendorID;
       for (final doc in documents) {
@@ -612,7 +369,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       if (checkedVendorID == vendorID) {
         addToCartWithSameVendor(customerID, productID, vendorID);
       } else {
-        final newCart = FirebaseFirestore.instance.collection('carts').doc();
+        final newCart = cartsCollection.doc();
         final cartData = CartModel(
             cartID: newCart.id,
             customerID: customerID,
@@ -630,10 +387,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   addToCartWithSameVendor(
-      String customerID, String productID, String vendorID) async {
+      String? customerID, String productID, String vendorID) async {
     try {
-      FirebaseFirestore.instance
-          .collection('carts')
+      cartsCollection
           .where('vendorID', isEqualTo: vendorID)
           .get()
           .then((QuerySnapshot querySnapshot) {
@@ -647,7 +403,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             // }
             productIDs.add(productID);
           }
-          FirebaseFirestore.instance.collection('carts').doc(cart.id).update({
+          cartsCollection.doc(cart.id).update({
             'productIDs': productIDs,
           }).then((value) => showDialog(
                   context: context,
@@ -661,37 +417,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  Future<void> addToWishlist({
-    context,
-    required String productName,
-    required List imageUrls,
-    required double regularPrice,
-  }) async {
-    try {
-      await FirebaseFirestore.instance.collection('wishlist').add({
-        'name': productName,
-        'regularPrice': regularPrice,
-        'imageUrls': imageUrls,
-      });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Product added to wishlist.'),
-        duration: Duration(seconds: 2),
-      ));
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Failed to add product to wishlist.'),
-        duration: Duration(seconds: 2),
-      ));
-    }
-  }
-
   viewVendorDetails(String vendorID) => showDialog(
       context: context,
       builder: (_) => FutureBuilder(
-          future: FirebaseFirestore.instance
-              .collection('vendor')
-              .where('vendorID', isEqualTo: vendorID)
-              .get(),
+          future:
+              vendorsCollection.where('vendorID', isEqualTo: vendorID).get(),
           builder: (context, s) {
             if (s.hasError) {
               return errorWidget(s.error.toString());
@@ -759,13 +489,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         leading: const Icon(Icons.location_on),
                         title: Text(vendor['address']),
                         subtitle: Text(vendor['landMark'])),
-                    ListTile(
-                        dense: true,
-                        isThreeLine: true,
-                        leading: const Icon(Icons.numbers),
-                        title: Text('PIN CODE: ${vendor['pinCode']}'),
-                        subtitle: Text(
-                            'TIN: ${vendor['tin']}\nTAX REGISTERED: ${vendor['isTaxRegistered'] == true ? 'YES' : 'NO'}')),
                     ListTile(
                         dense: true,
                         leading: const Icon(Icons.date_range),

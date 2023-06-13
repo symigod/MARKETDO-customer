@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:marketdo_app/models/order_model.dart';
-import 'package:marketdo_app/models/vendor_model.dart';
-import 'package:marketdo_app/screens/product_details_screen.dart';
+import 'package:marketdo_app/firebase.services.dart';
+import 'package:marketdo_app/models/order.model.dart';
+import 'package:marketdo_app/models/vendor.model.dart';
+import 'package:marketdo_app/screens/products/details.product.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
-import 'package:marketdo_app/widgets/api_widgets.dart';
+import 'package:marketdo_app/widgets/snapshots.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -15,14 +15,10 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  Stream getCarts() => FirebaseFirestore.instance
-      .collection('carts')
-      .where('customerID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-      .snapshots();
+  Stream getCarts() =>
+      cartsCollection.where('customerID', isEqualTo: authID).snapshots();
 
-  Stream<List<VendorModel>> getVendor(String vendorID) => FirebaseFirestore
-      .instance
-      .collection('vendor')
+  Stream<List<VendorModel>> getVendor(String vendorID) => vendorsCollection
       .where('vendorID', isEqualTo: vendorID)
       .snapshots()
       .map((vendor) =>
@@ -64,8 +60,7 @@ class _CartScreenState extends State<CartScreen> {
                                       topLeft: Radius.circular(5),
                                       topRight: Radius.circular(5))),
                               child: StreamBuilder(
-                                  stream: FirebaseFirestore.instance
-                                      .collection('vendor')
+                                  stream: vendorsCollection
                                       .doc(vendorID)
                                       .snapshots(),
                                   builder: (context, vendorSnapshot) {
@@ -209,8 +204,7 @@ class _CartScreenState extends State<CartScreen> {
       List<dynamic> productIDs) async {
     List<DocumentSnapshot> products = [];
     for (dynamic id in productIDs) {
-      DocumentSnapshot snapshot =
-          await FirebaseFirestore.instance.collection('products').doc(id).get();
+      DocumentSnapshot snapshot = await productsCollection.doc(id).get();
       if (snapshot.exists) {
         products.add(snapshot);
       }
@@ -231,11 +225,8 @@ class _CartScreenState extends State<CartScreen> {
                 TextButton(
                     onPressed: () async {
                       Navigator.pop(context);
-                      await FirebaseFirestore.instance
-                          .collection('carts')
-                          .doc(cartID)
-                          .delete()
-                          .then((value) => showDialog(
+                      await cartsCollection.doc(cartID).delete().then((value) =>
+                          showDialog(
                               context: context,
                               builder: (_) => successDialog(context,
                                   'Items in cart successfully removed!')));
@@ -258,26 +249,17 @@ class _CartScreenState extends State<CartScreen> {
                   TextButton(
                       onPressed: () async {
                         Navigator.pop(context);
-                        DocumentSnapshot cartSnapshot = await FirebaseFirestore
-                            .instance
-                            .collection('carts')
-                            .doc(cartID)
-                            .get();
+                        DocumentSnapshot cartSnapshot =
+                            await cartsCollection.doc(cartID).get();
                         List<dynamic> productIDs =
                             List<dynamic>.from(cartSnapshot['productIDs']);
                         if (index >= 0 && index < productIDs.length) {
                           productIDs.removeAt(index);
-                          await FirebaseFirestore.instance
-                              .collection('carts')
-                              .doc(cartID)
-                              .update({'productIDs': productIDs}).then(
-                                  (value) async {
+                          await cartsCollection.doc(cartID).update(
+                              {'productIDs': productIDs}).then((value) async {
                             if (productIDs.isEmpty) {
-                              await FirebaseFirestore.instance
-                                  .collection('carts')
-                                  .doc(cartID)
-                                  .delete()
-                                  .then((value) => showDialog(
+                              await cartsCollection.doc(cartID).delete().then(
+                                  (value) => showDialog(
                                       context: context,
                                       builder: (_) => successDialog(context,
                                           'Products in cart deleted successfully!')));
@@ -319,8 +301,7 @@ class OrderSummaryScreen extends StatefulWidget {
 class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
   String _selectedPaymentMethod = 'cash_on_delivery';
   String _selectedShippingMethod = 'home_delivery';
-  Stream getVendor(String vendorID) => FirebaseFirestore.instance
-      .collection('vendor')
+  Stream getVendor(String vendorID) => vendorsCollection
       .where('vendorID', isEqualTo: vendorID)
       .snapshots()
       .map((vendor) =>
@@ -338,10 +319,8 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
           child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: StreamBuilder(
-                  stream: FirebaseFirestore.instance
-                      .collection('customers')
-                      .where('customerID',
-                          isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                  stream: customersCollection
+                      .where('customerID', isEqualTo: authID)
                       .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
@@ -548,10 +527,9 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
           builder: (_) => confirmDialog(
                   context, 'PLACE ORDER', 'Do you want to continue?', () async {
                 try {
-                  final newOrder =
-                      FirebaseFirestore.instance.collection('orders').doc();
+                  final newOrder = ordersCollection.doc();
                   final orderData = OrderModel(
-                      customerID: FirebaseAuth.instance.currentUser!.uid,
+                      customerID: authID,
                       orderID: newOrder.id,
                       orderStatus: 'Accepted',
                       paymentMethod: _selectedPaymentMethod,
@@ -564,8 +542,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                       totalPayment: totalPayment,
                       vendorID: vendorID);
 
-                  await FirebaseFirestore.instance
-                      .collection('carts')
+                  await cartsCollection
                       .doc(cartID)
                       .delete()
                       .then((value) => Navigator.pop(context));
@@ -608,101 +585,3 @@ Widget cardWidget(context, String title, List<Widget> contents) => Card(
           mainAxisAlignment: MainAxisAlignment.center,
           children: contents)
     ]));
-
-// class OrderSummaryScreen extends StatefulWidget {
-// final String vendorName;
-// final List<Product> products;
-
-// const OrderSummaryScreen(
-// {Key? key, required this.vendorName, required this.products})
-// : super(key: key);
-
-// @override
-// _OrderSummaryScreenState createState() => _OrderSummaryScreenState();
-// }
-
-// class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
-// @override
-// Widget build(BuildContext context) {
-// int totalPrice = widget.products.fold<int>(
-//   0, (previousValue, product) => previousValue + product.regularPrice).toInt();
-
-// return Scaffold(
-//   appBar: AppBar(
-//     title: Text('Order Summary'),
-//   ),
-//   body: SingleChildScrollView(
-//     child: Padding(
-//       padding: const EdgeInsets.all(8.0),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Text(
-//             'Vendor: ${widget.vendorName}',
-//             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//           ),
-//           SizedBox(height: 8),
-//           Text(
-//             'Products:',
-//             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-//           ),
-//           Column(
-//             children: widget.products
-//                 .map(
-//                   (product) => ListTile(
-//                     title: Text(product.name),
-//                     subtitle: Text('\$${product.regularPrice}'),
-//                   ),
-//                 )
-//                 .toList(),
-//           ),
-//           SizedBox(height: 16),
-//           Text(
-//             'Total Price: \$${totalPrice.toStringAsFixed(2)}',
-//             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-//           ),
-//           SizedBox(height: 16),
-//           ElevatedButton(
-//             onPressed: () async {
-//               // Save the order to Firebase
-//               final orderData = {
-//                 'vendorName': widget.vendorName,
-//                 'products': widget.products
-//                     .map((product) => {
-//                           'name': product.name,
-//                           'price': product.regularPrice,
-//                           'imageUrls': product.imageUrls
-//                         })
-//                     .toList(),
-//                 'totalPrice': totalPrice,
-//                 'timestamp': Timestamp.now()
-//               };
-//               await FirebaseFirestore.instance
-//                   .collection('orders')
-//                   .add(orderData);
-
-//               // Clear the cart for this vendor
-//               await FirebaseFirestore.instance
-//                   .collection('carts')
-//                   .where('seller', isEqualTo: widget.vendorName)
-//                   .get()
-//                   .then((snapshot) {
-//                 for (DocumentSnapshot doc in snapshot.docs) {
-//                   doc.reference.delete();
-//                 }
-//               });
-
-//               if(Navigator.canPop(context)){
-//                   Navigator.pop(context);
-//                 }
-
-//             },
-//             child: Text('Place Order'),
-//           ),
-//         ],
-//       ),
-//     ),
-//   ),
-// );
-// }
-// }

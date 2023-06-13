@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:marketdo_app/screens/orders%20screen/history.dart';
-import 'package:marketdo_app/screens/orders%20screen/pending.dart';
+import 'package:marketdo_app/screens/orders/history.dart';
+import 'package:marketdo_app/screens/orders/pending.dart';
 import 'package:tab_indicator_styler/tab_indicator_styler.dart';
 
 class OrderScreen extends StatefulWidget {

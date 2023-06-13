@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:marketdo_app/firebase_services.dart';
-import 'package:marketdo_app/screens/landing_screen.dart';
+import 'package:marketdo_app/firebase.services.dart';
+import 'package:marketdo_app/screens/authentication/landing.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -72,36 +72,31 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (_formKey.currentState!.validate()) {
       {
         EasyLoading.show(status: 'Please wait...');
-        _services
-            .uploadImage(
-                coverPhoto, 'customers/${_services.user!.uid}/cover.jpg')
-            .then((String? url) {
+        _services.uploadImage(coverPhoto, 'customers/$authID/cover.jpg').then(
+            (String? url) {
           if (url != null) {
             setState(() => displayImage = url);
           }
         }).then((value) => _services
-                    .uploadImage(
-                        logo, 'customers/${_services.user!.uid}/logo.jpg')
-                    .then((url) => setState(() => logoUrl = url))
-                    .then((value) {
-                  return _services.addCustomer(data: {
-                    'coverPhoto': displayImage,
-                    'logo': logoUrl,
-                    'name': _customerName.text,
-                    'mobile': '+63${_contactNumber.text}',
-                    'address': _address.text,
-                    'email': _email.text,
-                    'landMark': _landMark.text,
-                    'approved': true,
-                    'registeredOn': DateTime.now(),
-                  }).then((value) {
-                    EasyLoading.dismiss();
-                    return Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                const LandingScreen()));
-                  });
-                }));
+                .uploadImage(logo, 'customers/$authID/logo.jpg')
+                .then((url) => setState(() => logoUrl = url))
+                .then((value) {
+              return _services.addCustomer(data: {
+                'coverPhoto': displayImage,
+                'logo': logoUrl,
+                'name': _customerName.text,
+                'mobile': '+63${_contactNumber.text}',
+                'address': _address.text,
+                'email': _email.text,
+                'landMark': _landMark.text,
+                'approved': true,
+                'registeredOn': DateTime.now(),
+              }).then((value) {
+                EasyLoading.dismiss();
+                return Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (BuildContext context) => const LandingScreen()));
+              });
+            }));
       }
     }
   }

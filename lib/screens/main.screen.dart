@@ -1,12 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:marketdo_app/screens/cart_screen.dart';
-import 'package:marketdo_app/screens/category_screen.dart';
-import 'package:marketdo_app/screens/favorite_screen.dart';
-import 'package:marketdo_app/screens/home_screen.dart';
-import 'package:marketdo_app/screens/orders%20screen/order_screen.dart';
-import 'package:marketdo_app/widgets/custom_drawer.dart';
+import 'package:marketdo_app/firebase.services.dart';
+import 'package:marketdo_app/screens/orders/cart.dart';
+import 'package:marketdo_app/screens/categories/main.categories.dart';
+import 'package:marketdo_app/screens/favorites.dart';
+import 'package:marketdo_app/screens/home.dart';
+import 'package:marketdo_app/screens/orders/order_screen.dart';
+import 'package:marketdo_app/widgets/drawer.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
 
 class MainScreen extends StatefulWidget {
@@ -76,11 +75,8 @@ class _MainScreenState extends State<MainScreen> {
                     icon: Stack(children: [
                       const Icon(Icons.shopping_cart),
                       StreamBuilder(
-                          stream: FirebaseFirestore.instance
-                              .collection('carts')
-                              .where('customerID',
-                                  isEqualTo:
-                                      FirebaseAuth.instance.currentUser!.uid)
+                          stream: cartsCollection
+                              .where('customerID', isEqualTo: authID)
                               .snapshots(),
                           builder: (context, snapshot) {
                             if (snapshot.hasError) {
