@@ -3,9 +3,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VendorModel {
+  final address;
   final businessName;
-  final city;
-  final country;
   final email;
   final isActive;
   final isApproved;
@@ -13,17 +12,13 @@ class VendorModel {
   final landMark;
   final logo;
   final mobile;
-  final pinCode;
-  final registeredOn;
   final shopImage;
-  final state;
-  final tin;
+  final registeredOn;
   final vendorID;
 
   VendorModel({
+    required this.address,
     required this.businessName,
-    required this.city,
-    required this.country,
     required this.email,
     required this.isActive,
     required this.isApproved,
@@ -31,20 +26,16 @@ class VendorModel {
     required this.landMark,
     required this.logo,
     required this.mobile,
-    required this.pinCode,
-    required this.registeredOn,
     required this.shopImage,
-    required this.state,
-    required this.tin,
+    required this.registeredOn,
     required this.vendorID,
   });
 
   factory VendorModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = (doc.data() as Map<String, dynamic>);
     return VendorModel(
+      address: data['address'],
       businessName: data['businessName'],
-      city: data['city'],
-      country: data['country'],
       email: data['email'],
       isActive: data['isActive'],
       isApproved: data['isApproved'],
@@ -52,19 +43,15 @@ class VendorModel {
       landMark: data['landMark'],
       logo: data['logo'],
       mobile: data['mobile'],
-      pinCode: data['pinCode'],
-      registeredOn: data['registeredOn'],
       shopImage: data['shopImage'],
-      state: data['state'],
-      tin: data['tin'],
+      registeredOn: data['registeredOn'],
       vendorID: data['vendorID'],
     );
   }
 
   Map<String, dynamic> toFirestore() => {
+        'address': address,
         'businessName': businessName,
-        'city': city,
-        'country': country,
         'email': email,
         'isActive': isActive,
         'isApproved': isApproved,
@@ -72,11 +59,8 @@ class VendorModel {
         'landMark': landMark,
         'logo': logo,
         'mobile': mobile,
-        'pinCode': pinCode,
-        'registeredOn': registeredOn,
         'shopImage': shopImage,
-        'state': state,
-        'tin': tin,
+        'registeredOn': registeredOn,
         'vendorID': vendorID,
       };
 }

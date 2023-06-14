@@ -4,9 +4,10 @@ import 'package:marketdo_app/screens/orders/cart.dart';
 import 'package:marketdo_app/screens/categories/main.categories.dart';
 import 'package:marketdo_app/screens/favorites.dart';
 import 'package:marketdo_app/screens/home.dart';
-import 'package:marketdo_app/screens/orders/order_screen.dart';
+import 'package:marketdo_app/screens/orders/main.orders.dart';
 import 'package:marketdo_app/widgets/drawer.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
+import 'package:marketdo_app/widgets/snapshots.dart';
 
 class MainScreen extends StatefulWidget {
   final int? index;
@@ -80,8 +81,7 @@ class _MainScreenState extends State<MainScreen> {
                               .snapshots(),
                           builder: (context, snapshot) {
                             if (snapshot.hasError) {
-                              return Center(
-                                  child: Text('Error: ${snapshot.error}'));
+                              return errorWidget(snapshot.error.toString());
                             }
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -111,8 +111,46 @@ class _MainScreenState extends State<MainScreen> {
                           })
                     ]),
                     label: 'Cart'),
-                const BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_bag), label: 'Orders'),
+                BottomNavigationBarItem(
+                    icon: Stack(children: [
+                      const Icon(Icons.shopping_bag),
+                      StreamBuilder(
+                          stream: ordersCollection
+                              .where('customerID', isEqualTo: authID)
+                              .where('isPending', isEqualTo: true)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return errorWidget(snapshot.error.toString());
+                            }
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Positioned(
+                                  right: 0, top: 0, child: Container());
+                            }
+                            return Positioned(
+                                right: 0,
+                                top: 0,
+                                child: snapshot.data!.docs.isEmpty
+                                    ? Container()
+                                    : Container(
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: const BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle),
+                                        constraints: const BoxConstraints(
+                                            minWidth: 12, minHeight: 12),
+                                        child: Text(
+                                            snapshot.data!.docs.length
+                                                .toString(),
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold),
+                                            textAlign: TextAlign.center)));
+                          })
+                    ]),
+                    label: 'Orders'),
                 const BottomNavigationBarItem(
                     icon: Icon(Icons.favorite), label: 'Favorites')
               ],

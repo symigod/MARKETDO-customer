@@ -36,6 +36,6 @@ class _OrderScreenState extends State<OrderScreen> {
                               style: TextStyle(color: Colors.green.shade900)))
                     ])),
             body: const TabBarView(
-                children: [PendingOrdersScreen(), OrdersHistoryScreen()])),
+                children: [PendingOrdersScreen(), OrderHistoryScreen()])),
       );
 }

@@ -34,14 +34,6 @@ class HomeProductList extends StatelessWidget {
                   return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: InkWell(
-                          // onTap: () => Navigator.push(
-                          //     context,
-                          //     PageRouteBuilder(
-                          //         transitionDuration:
-                          //             const Duration(seconds: 1),
-                          //         pageBuilder: (context, a1, a2) =>
-                          //             ProductDetailScreen(
-                          //                 productID: product.productID))),
                           onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -58,9 +50,8 @@ class HomeProductList extends StatelessWidget {
                                         height: 90,
                                         width: 90,
                                         child: CachedNetworkImage(
-                                          imageUrl: product.imageURL,
-                                          fit: BoxFit.cover,
-                                        ))),
+                                            imageUrl: product.imageURL,
+                                            fit: BoxFit.cover))),
                                 const SizedBox(height: 10),
                                 Text(product.productName,
                                     textAlign: TextAlign.center,

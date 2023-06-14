@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/screens/authentication/login.dart';
 import 'package:marketdo_app/screens/main.screen.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +30,44 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+void updateCustomerOnlineStatus(bool isOnline) => customersCollection
+    .doc(authID)
+    .update({'isOnline': isOnline})
+    .then((value) =>
+        isOnline == true ? print('CUSTOMER ONLINE') : print('CUSTOMER OFFLINE'))
+    .catchError(
+        (error) => print('Failed to update customer online status: $error'));
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed) {
+      updateCustomerOnlineStatus(true);
+    } else {
+      updateCustomerOnlineStatus(false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) => MaterialApp(

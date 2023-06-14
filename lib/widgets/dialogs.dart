@@ -1,7 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:marketdo_app/firebase.services.dart';
+import 'package:marketdo_app/widgets/snapshots.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Widget confirmDialog(
@@ -27,6 +30,126 @@ Widget successDialog(BuildContext context, String message) => AlertDialog(
           TextButton(
               onPressed: () => Navigator.pop(context), child: const Text('OK'))
         ]);
+
+Widget cardWidget(context, String title, List<Widget> contents) => Card(
+    shape: RoundedRectangleBorder(
+        side: const BorderSide(width: 1, color: Colors.green),
+        borderRadius: BorderRadius.circular(5)),
+    child: Column(children: [
+      Card(
+          color: Colors.green,
+          margin: EdgeInsets.zero,
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(5), topRight: Radius.circular(5))),
+          child: Center(
+              child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Text(title,
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center)))),
+      Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: contents)
+    ]));
+
+viewVendorDetails(context, String vendorID) => showDialog(
+    context: context,
+    builder: (_) => FutureBuilder(
+        future: vendorsCollection.where('vendorID', isEqualTo: vendorID).get(),
+        builder: (context, vs) {
+          if (vs.hasError) {
+            return errorWidget(vs.error.toString());
+          }
+          if (vs.connectionState == ConnectionState.waiting) {
+            return loadingWidget();
+          }
+          if (vs.data!.docs.isNotEmpty) {
+            var vendor = vs.data!.docs[0];
+            return AlertDialog(
+                scrollable: true,
+                contentPadding: EdgeInsets.zero,
+                content: Column(children: [
+                  SizedBox(
+                      height: 150,
+                      child: DrawerHeader(
+                          margin: EdgeInsets.zero,
+                          padding: EdgeInsets.zero,
+                          child: Stack(alignment: Alignment.center, children: [
+                            Container(
+                                padding: const EdgeInsets.all(20),
+                                height: 150,
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(3),
+                                        topRight: Radius.circular(3)),
+                                    image: DecorationImage(
+                                        image:
+                                            NetworkImage(vendor['shopImage']),
+                                        fit: BoxFit.cover))),
+                            Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Container(
+                                      height: 120,
+                                      width: 120,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: vendor['isOnline']
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                              width: 3)),
+                                      child: Container(
+                                          decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 3)),
+                                          child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(130),
+                                              child: CachedNetworkImage(
+                                                  imageUrl: vendor['logo'],
+                                                  fit: BoxFit.cover))))
+                                ])
+                          ]))),
+                  ListTile(
+                      dense: true,
+                      isThreeLine: true,
+                      leading: const Icon(Icons.store),
+                      title: Text(vendor['businessName'],
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: FittedBox(
+                          child: Text('Vendor ID:\n${vendor['vendorID']}'))),
+                  ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.perm_phone_msg),
+                      title: Text(vendor['mobile']),
+                      subtitle: Text(vendor['email'])),
+                  ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.location_on),
+                      title: Text(vendor['address']),
+                      subtitle: Text(vendor['landMark'])),
+                  ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.date_range),
+                      title: const Text('REGISTERED ON:'),
+                      subtitle: Text(dateTimeToString(vendor['registeredOn'])))
+                ]),
+                actionsAlignment: MainAxisAlignment.center,
+                actions: [
+                  ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'))
+                ]);
+          }
+          return emptyWidget('VENDOR NOT FOUND');
+        }));
 
 Future<void> openURL(context, String url) async {
   if (!await launchUrl(Uri.parse(url))) {

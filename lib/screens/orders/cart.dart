@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/firebase.services.dart';
-import 'package:marketdo_app/models/order.model.dart';
 import 'package:marketdo_app/models/vendor.model.dart';
-import 'package:marketdo_app/screens/products/details.product.dart';
+import 'package:marketdo_app/screens/orders/summary.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
 import 'package:marketdo_app/widgets/snapshots.dart';
 
@@ -30,19 +29,20 @@ class _CartScreenState extends State<CartScreen> {
           backgroundColor: Colors.transparent, elevation: 0, toolbarHeight: 0),
       body: StreamBuilder(
           stream: getCarts(),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+          builder: (context, cs) {
+            if (cs.hasError) {
+              return errorWidget(cs.error.toString());
             }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+            if (cs.connectionState == ConnectionState.waiting) {
+              return loadingWidget();
             }
-            if (snapshot.data!.docs.length != 0) {
-              List<QueryDocumentSnapshot> carts = snapshot.data!.docs;
+            if (cs.data!.docs.length != 0) {
+              List<QueryDocumentSnapshot> carts = cs.data!.docs;
               return ListView.builder(
                   itemCount: carts.length,
                   itemBuilder: (context, index) {
                     String cartID = carts[index].id;
+                    var cart = carts[index];
                     List<dynamic> productIDs = carts[index]['productIDs'];
                     String vendorID = carts[index]['vendorID'];
                     return Card(
@@ -63,18 +63,16 @@ class _CartScreenState extends State<CartScreen> {
                                   stream: vendorsCollection
                                       .doc(vendorID)
                                       .snapshots(),
-                                  builder: (context, vendorSnapshot) {
-                                    if (vendorSnapshot.hasError) {
-                                      return errorWidget(
-                                          vendorSnapshot.error.toString());
+                                  builder: (context, vs) {
+                                    if (vs.hasError) {
+                                      return errorWidget(vs.error.toString());
                                     }
-                                    if (vendorSnapshot.connectionState ==
+                                    if (vs.connectionState ==
                                         ConnectionState.waiting) {
                                       return loadingWidget();
                                     }
-                                    if (vendorSnapshot.hasData) {
-                                      DocumentSnapshot vendor =
-                                          vendorSnapshot.data!;
+                                    if (vs.hasData) {
+                                      DocumentSnapshot vendor = vs.data!;
                                       return ListTile(
                                           leading: SizedBox(
                                               height: 40,
@@ -98,32 +96,32 @@ class _CartScreenState extends State<CartScreen> {
                                   })),
                           FutureBuilder<List<DocumentSnapshot>>(
                               future: _fetchProducts(productIDs),
-                              builder: (context, productsSnapshot) {
-                                if (productsSnapshot.hasError) {
-                                  return errorWidget(
-                                      productsSnapshot.error.toString());
+                              builder: (context, ps) {
+                                if (ps.hasError) {
+                                  return errorWidget(ps.error.toString());
                                 }
-                                if (productsSnapshot.connectionState ==
+                                if (ps.connectionState ==
                                     ConnectionState.waiting) {
                                   return loadingWidget();
                                 }
-                                if (productsSnapshot.hasData) {
-                                  List products = productsSnapshot.data!;
-                                  double partialPrice = 0;
-                                  double finalPrice = 0;
+                                if (ps.hasData) {
+                                  List products = ps.data!;
+                                  double totalPayment = 0;
                                   double shippingCharge = 0;
                                   return Column(children: [
                                     Column(
                                         children: products.map((product) {
-                                      double regularPrice =
-                                          product['regularPrice'].toDouble();
+                                      List<double> paymentsList =
+                                          List<double>.from(cart['payments']);
+                                      int pIndex = products.indexOf(product);
+                                      double payments =
+                                          cart['payments'][pIndex];
+                                      double unitsBought =
+                                          cart['unitsBought'][pIndex];
+                                      totalPayment = paymentsList.reduce(
+                                          (sum, payment) => sum + payment);
                                       shippingCharge =
-                                          product['shippingCharge'].toDouble();
-                                      partialPrice += regularPrice;
-                                      finalPrice =
-                                          partialPrice /* + shippingCharge */;
-                                      String formattedPrice =
-                                          'P ${regularPrice.toStringAsFixed(2)}';
+                                          product['shippingCharge'];
                                       return ListTile(
                                           dense: true,
                                           isThreeLine: true,
@@ -135,17 +133,42 @@ class _CartScreenState extends State<CartScreen> {
                                                       BorderRadius.circular(50),
                                                   child: Image.network(
                                                       product['imageURL']))),
-                                          title: Text(product['productName']),
-                                          subtitle: RichText(
+                                          title: RichText(
                                               text: TextSpan(
-                                                  text:
-                                                      '${product['description']}\n',
-                                                  style: const TextStyle(color: Colors.grey, fontFamily: 'Lato'),
+                                                  style: const TextStyle(
+                                                      fontFamily: 'Lato'),
                                                   children: [
                                                 TextSpan(
-                                                    text: formattedPrice,
+                                                    text:
+                                                        '${product['productName']}',
                                                     style: const TextStyle(
-                                                        color: Colors.red))
+                                                        color: Colors.black,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                TextSpan(
+                                                    text:
+                                                        ' [$unitsBought ${product['unit']}/s]',
+                                                    style: const TextStyle(
+                                                        color: Colors.blue,
+                                                        fontWeight:
+                                                            FontWeight.bold))
+                                              ])),
+                                          subtitle: RichText(
+                                              text: TextSpan(
+                                                  style: const TextStyle(
+                                                      color: Colors.grey,
+                                                      fontFamily: 'Lato'),
+                                                  children: [
+                                                TextSpan(
+                                                    text:
+                                                        '${product['description']}\n'),
+                                                TextSpan(
+                                                    text:
+                                                        'P ${payments.toStringAsFixed(2)}',
+                                                    style: const TextStyle(
+                                                        color: Colors.red,
+                                                        fontWeight:
+                                                            FontWeight.bold))
                                               ])),
                                           trailing: IconButton(
                                               onPressed: () =>
@@ -156,40 +179,39 @@ class _CartScreenState extends State<CartScreen> {
                                               icon: const Icon(Icons.close,
                                                   color: Colors.red)));
                                     }).toList()),
-                                    Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                        child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                  'TOTAL: P ${finalPrice.toStringAsFixed(2)}',
-                                                  style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                              TextButton(
-                                                  onPressed: () => Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (_) =>
-                                                              OrderSummaryScreen(
-                                                                  cartID:
-                                                                      cartID,
-                                                                  vendorID:
-                                                                      vendorID,
-                                                                  products:
-                                                                      products,
-                                                                  partialPrice:
-                                                                      partialPrice,
-                                                                  shippingCharge:
-                                                                      shippingCharge))),
-                                                  child: const Text('View more',
-                                                      style: TextStyle(
-                                                          color: Colors.green,
-                                                          fontWeight:
-                                                              FontWeight.bold)))
-                                            ]))
+                                    const Divider(
+                                        color: Colors.green,
+                                        height: 0,
+                                        thickness: 1),
+                                    ListTile(
+                                        title: Text(
+                                            'TOTAL: P ${totalPayment.toStringAsFixed(2)}',
+                                            style: const TextStyle(
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold)),
+                                        trailing: TextButton(
+                                            onPressed: () => Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        OrderSummaryScreen(
+                                                          cartID: cartID,
+                                                          vendorID: vendorID,
+                                                          payments:
+                                                              cart['payments'],
+                                                          products: products,
+                                                          partialPrice:
+                                                              totalPayment,
+                                                          shippingCharge:
+                                                              shippingCharge,
+                                                          unitsBought: cart[
+                                                              'unitsBought'],
+                                                        ))),
+                                            child: const Text('View more',
+                                                style: TextStyle(
+                                                    color: Colors.green,
+                                                    fontWeight:
+                                                        FontWeight.bold))))
                                   ]);
                                 }
                                 return emptyWidget('PRODUCTS NOT FOUND');
@@ -277,311 +299,3 @@ class _CartScreenState extends State<CartScreen> {
                 ]));
   }
 }
-
-class OrderSummaryScreen extends StatefulWidget {
-  final String cartID;
-  final String vendorID;
-  final List products;
-  final double partialPrice;
-  final double shippingCharge;
-
-  const OrderSummaryScreen(
-      {Key? key,
-      required this.cartID,
-      required this.vendorID,
-      required this.products,
-      required this.partialPrice,
-      required this.shippingCharge})
-      : super(key: key);
-
-  @override
-  _OrderSummaryScreenState createState() => _OrderSummaryScreenState();
-}
-
-class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
-  String _selectedPaymentMethod = 'cash_on_delivery';
-  String _selectedShippingMethod = 'home_delivery';
-  Stream getVendor(String vendorID) => vendorsCollection
-      .where('vendorID', isEqualTo: vendorID)
-      .snapshots()
-      .map((vendor) =>
-          vendor.docs.map((doc) => VendorModel.fromFirestore(doc)).toList());
-
-  double setShippingCharge() =>
-      _selectedShippingMethod == 'pick_up' ? 0 : widget.shippingCharge;
-
-  double totalPayment() => widget.partialPrice + setShippingCharge();
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: const Text('Order Summary')),
-      body: SingleChildScrollView(
-          child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: StreamBuilder(
-                  stream: customersCollection
-                      .where('customerID', isEqualTo: authID)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    }
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    return Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          cardWidget(context, 'VENDOR', [
-                            StreamBuilder(
-                                stream: getVendor(widget.vendorID),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasError) {
-                                    return errorWidget(
-                                        snapshot.error.toString());
-                                  }
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const Center(
-                                        child: CircularProgressIndicator());
-                                  }
-                                  if (snapshot.data!.isNotEmpty) {
-                                    var vendor = snapshot.data![0];
-                                    return Column(children: [
-                                      ListTile(
-                                          dense: true,
-                                          leading: const SizedBox(
-                                              height: 50,
-                                              width: 50,
-                                              child: Center(
-                                                  child: Icon(Icons.store))),
-                                          title: Text(vendor.businessName),
-                                          subtitle: Text(vendor.vendorID)),
-                                      ListTile(
-                                          dense: true,
-                                          leading: const SizedBox(
-                                              height: 50,
-                                              width: 50,
-                                              child: Center(
-                                                  child:
-                                                      Icon(Icons.location_on))),
-                                          title: Text(
-                                              '${vendor.city}, ${vendor.state}, ${vendor.country}'),
-                                          subtitle: Text(vendor.landMark)),
-                                      ListTile(
-                                          onTap: () => showDialog(
-                                              context: context,
-                                              builder: (_) => AlertDialog(
-                                                  scrollable: true,
-                                                  title: const Text(
-                                                      'VENDOR CONTACT'),
-                                                  contentPadding:
-                                                      EdgeInsets.zero,
-                                                  content: Column(children: [
-                                                    const SizedBox(height: 20),
-                                                    ListTile(
-                                                        onTap: () => openURL(
-                                                            context,
-                                                            'tel:${vendor.mobile}'),
-                                                        dense: true,
-                                                        leading: const Icon(
-                                                            Icons.call),
-                                                        title:
-                                                            Text(vendor.mobile),
-                                                        trailing: IconButton(
-                                                            onPressed: () =>
-                                                                copyToClipboard(
-                                                                    context,
-                                                                    vendor
-                                                                        .mobile),
-                                                            icon: const Icon(
-                                                                Icons.copy))),
-                                                    ListTile(
-                                                        onTap: () => openURL(
-                                                            context,
-                                                            'mailto:${vendor.email}'),
-                                                        dense: true,
-                                                        leading: const Icon(
-                                                            Icons.email),
-                                                        title:
-                                                            Text(vendor.email),
-                                                        trailing: IconButton(
-                                                            onPressed: () =>
-                                                                copyToClipboard(
-                                                                    context,
-                                                                    vendor
-                                                                        .email),
-                                                            icon: const Icon(
-                                                                Icons.copy))),
-                                                    const SizedBox(height: 20)
-                                                  ]))),
-                                          dense: true,
-                                          leading: const SizedBox(
-                                              height: 50,
-                                              width: 50,
-                                              child: Center(
-                                                  child: Icon(
-                                                      Icons.perm_phone_msg))),
-                                          title: Text(vendor.mobile),
-                                          subtitle: Text(vendor.email))
-                                    ]);
-                                  }
-                                  return emptyWidget('VENDOR NOT FOUND');
-                                })
-                          ]),
-                          cardWidget(context, 'PRODUCTS', [
-                            ...widget.products
-                                .map((product) => ListTile(
-                                    dense: true,
-                                    onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (_) => ProductDetailScreen(
-                                                productID:
-                                                    product['productID']))),
-                                    leading: SizedBox(
-                                        height: 40,
-                                        width: 40,
-                                        child:
-                                            Image.network(product['imageURL'])),
-                                    title: Text(product['productName']),
-                                    subtitle: Text(product['description']),
-                                    trailing: Text(
-                                        '${product['regularPrice'].toDouble().toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.bold))))
-                                .toList(),
-                            Container(
-                              decoration: const BoxDecoration(
-                                  border: Border(
-                                      top: BorderSide(
-                                          color: Colors.green, width: 1))),
-                              child: ListTile(
-                                  dense: true,
-                                  title: const Text('TOTAL:',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  trailing: Text(
-                                      'P ${widget.partialPrice.toStringAsFixed(2)}',
-                                      style: const TextStyle(
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.bold))),
-                            )
-                          ]),
-                          cardWidget(context, 'SHIPPING', [
-                            ListTile(
-                                title: DropdownButton<String>(
-                                    value: _selectedShippingMethod,
-                                    onChanged: (value) => setState(
-                                        () => _selectedShippingMethod = value!),
-                                    items: const [
-                                      DropdownMenuItem(
-                                          value: 'home_delivery',
-                                          child: Text('Home Delivery')),
-                                      DropdownMenuItem(
-                                          value: 'pick_up',
-                                          child: Text('Pick-Up'))
-                                    ]),
-                                trailing: Text(
-                                    'P ${setShippingCharge().toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.bold)))
-                          ]),
-                          cardWidget(context, 'TOTAL PAYMENT', [
-                            ListTile(
-                                title: DropdownButton<String>(
-                                    value: _selectedPaymentMethod,
-                                    onChanged: (value) => setState(
-                                        () => _selectedPaymentMethod = value!),
-                                    items: const [
-                                      DropdownMenuItem(
-                                          value: 'cash_on_delivery',
-                                          child: Text('Cash on Delivery')),
-                                      DropdownMenuItem(
-                                          value: 'gcash', child: Text('Gcash'))
-                                    ]),
-                                trailing: Text(
-                                    'P ${totalPayment().toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.bold)))
-                          ]),
-                          const SizedBox(height: 100),
-                        ]);
-                  }))),
-      bottomSheet: ListTile(
-          onTap: () =>
-              placeOrder(totalPayment(), widget.vendorID, widget.cartID),
-          tileColor: Colors.green.shade900,
-          leading: const Icon(Icons.shopping_bag, color: Colors.white),
-          title: const Text('Check out',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          trailing: const Icon(Icons.check, color: Colors.white)));
-
-  placeOrder(double totalPayment, String vendorID, String cartID) async =>
-      showDialog(
-          context: context,
-          builder: (_) => confirmDialog(
-                  context, 'PLACE ORDER', 'Do you want to continue?', () async {
-                try {
-                  final newOrder = ordersCollection.doc();
-                  final orderData = OrderModel(
-                      customerID: authID,
-                      orderID: newOrder.id,
-                      orderStatus: 'Accepted',
-                      paymentMethod: _selectedPaymentMethod,
-                      productIDs: widget.products
-                          .map((product) => product['productID'])
-                          .toList(),
-                      shippingFee: setShippingCharge(),
-                      shippingMethod: _selectedShippingMethod,
-                      orderedOn: DateTime.now(),
-                      totalPayment: totalPayment,
-                      vendorID: vendorID);
-
-                  await cartsCollection
-                      .doc(cartID)
-                      .delete()
-                      .then((value) => Navigator.pop(context));
-
-                  await newOrder
-                      .set(orderData.toFirestore())
-                      .then((value) => showDialog(
-                          context: context,
-                          builder: (builder) =>
-                              successDialog(context, 'Order successful!')))
-                      .then((value) => Navigator.pop(context));
-                } catch (e) {
-                  showDialog(
-                      context: context,
-                      builder: (_) => errorDialog(context, e.toString()));
-                }
-              }));
-}
-
-Widget cardWidget(context, String title, List<Widget> contents) => Card(
-    shape: RoundedRectangleBorder(
-        side: const BorderSide(width: 1, color: Colors.green),
-        borderRadius: BorderRadius.circular(5)),
-    child: Column(children: [
-      Card(
-          color: Colors.green,
-          margin: EdgeInsets.zero,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(5), topRight: Radius.circular(5))),
-          child: Center(
-              child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(title,
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center)))),
-      Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: contents)
-    ]));

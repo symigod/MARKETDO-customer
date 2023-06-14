@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/models/cart.model.dart';
@@ -228,7 +229,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         title: Text(vendor['businessName']),
                                         trailing: TextButton(
                                             onPressed: () => viewVendorDetails(
-                                                vendor['vendorID']),
+                                                context, vendor['vendorID']),
                                             child:
                                                 const Text('Vendor Details'))),
                                     const Divider(height: 0, thickness: 1)
@@ -328,18 +329,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       style: TextStyle(
                                           color: Colors.red,
                                           fontWeight: FontWeight.bold))),
-                              TextButton(
+                              ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: kilograms == 0.0
+                                          ? Colors.grey
+                                          : Colors.green.shade900),
                                   onPressed: () async {
-                                    final vendorIDStream = productsCollection
-                                        .where('productID',
-                                            isEqualTo: widget.productID)
-                                        .snapshots();
-                                    final vendorIDDocument =
-                                        await vendorIDStream.first;
-                                    final vendorID =
-                                        vendorIDDocument.docs.first['vendorID'];
-                                    addToCart(
-                                        authID, widget.productID, vendorID);
+                                    if (kilograms == 0.0) {
+                                      null;
+                                    } else {
+                                      final vendorIDStream = productsCollection
+                                          .where('productID',
+                                              isEqualTo: widget.productID)
+                                          .snapshots();
+                                      final vendorIDDocument =
+                                          await vendorIDStream.first;
+                                      final vendorID = vendorIDDocument
+                                          .docs.first['vendorID'];
+                                      addToCart(authID, widget.productID,
+                                          finalPrice, kilograms, vendorID);
+                                    }
                                   },
                                   child: const Text('CONFIRM',
                                       style: TextStyle(
@@ -356,8 +365,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           trailing: const Icon(Icons.check, color: Colors.white)));
 
-  addToCart(String? customerID, String productID, String vendorID) async {
+  addToCart(String? customerID, String productID, double payment,
+      double unitsBought, String vendorID) async {
     try {
+      EasyLoading.show(status: 'Adding to cart...');
       final checkVendorID =
           await cartsCollection.where('vendorID', isEqualTo: vendorID).get();
       final List<QueryDocumentSnapshot> documents = checkVendorID.docs;
@@ -367,44 +378,56 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         setState(() => checkedVendorID = data['vendorID']);
       }
       if (checkedVendorID == vendorID) {
-        addToCartWithSameVendor(customerID, productID, vendorID);
+        addToCartWithSameVendor(
+            customerID, productID, payment, unitsBought, vendorID);
+        EasyLoading.dismiss();
       } else {
         final newCart = cartsCollection.doc();
         final cartData = CartModel(
             cartID: newCart.id,
             customerID: customerID,
             productIDs: [productID],
+            payments: [payment],
+            unitsBought: [unitsBought],
             vendorID: vendorID);
-        await newCart.set(cartData.toFirestore()).then((value) => showDialog(
-                context: context,
-                builder: (builder) =>
-                    successDialog(context, 'New product added to cart!'))
-            .then((value) => Navigator.pop(context)));
+        await newCart
+            .set(cartData.toFirestore())
+            .then((value) => EasyLoading.dismiss())
+            .then((value) => showDialog(
+                    context: context,
+                    builder: (builder) =>
+                        successDialog(context, 'New product added to cart!'))
+                .then((value) => Navigator.pop(context)));
       }
     } catch (e) {
       errorDialog(context, e.toString());
     }
   }
 
-  addToCartWithSameVendor(
-      String? customerID, String productID, String vendorID) async {
+  addToCartWithSameVendor(String? customerID, String productID, double payment,
+      double unitsBought, String vendorID) async {
     try {
       cartsCollection
           .where('vendorID', isEqualTo: vendorID)
           .get()
           .then((QuerySnapshot querySnapshot) {
         for (var cart in querySnapshot.docs) {
-          late List<dynamic> productIDs;
+          late List<dynamic> _productIDs;
+          late List<dynamic> _payments;
+          late List<dynamic> _unitsBought;
           Map<String, dynamic>? cartData = cart.data() as Map<String, dynamic>?;
           if (cartData != null && cartData.containsKey('productIDs')) {
-            productIDs = cartData['productIDs'] as List<dynamic>;
-            // for (var productID in productIDs) {
-            //   print(productID);
-            // }
-            productIDs.add(productID);
+            _productIDs = cartData['productIDs'] as List<dynamic>;
+            _payments = cartData['payments'] as List<dynamic>;
+            _unitsBought = cartData['unitsBought'] as List<dynamic>;
+            _productIDs.add(productID);
+            _payments.add(payment);
+            _unitsBought.add(unitsBought);
           }
           cartsCollection.doc(cart.id).update({
-            'productIDs': productIDs,
+            'productIDs': _productIDs,
+            'payments': _payments,
+            'unitsBought': _unitsBought,
           }).then((value) => showDialog(
                   context: context,
                   builder: (_) =>
@@ -417,91 +440,5 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  viewVendorDetails(String vendorID) => showDialog(
-      context: context,
-      builder: (_) => FutureBuilder(
-          future:
-              vendorsCollection.where('vendorID', isEqualTo: vendorID).get(),
-          builder: (context, s) {
-            if (s.hasError) {
-              return errorWidget(s.error.toString());
-            }
-            if (s.connectionState == ConnectionState.waiting) {
-              return loadingWidget();
-            }
-            if (s.data!.docs.isNotEmpty) {
-              var vendor = s.data!.docs[0];
-              return AlertDialog(
-                  scrollable: true,
-                  contentPadding: EdgeInsets.zero,
-                  content: Column(children: [
-                    SizedBox(
-                        height: 150,
-                        child: DrawerHeader(
-                            margin: EdgeInsets.zero,
-                            padding: EdgeInsets.zero,
-                            child:
-                                Stack(alignment: Alignment.center, children: [
-                              Container(
-                                  padding: const EdgeInsets.all(20),
-                                  height: 150,
-                                  decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(3),
-                                          topRight: Radius.circular(3)),
-                                      image: DecorationImage(
-                                          image:
-                                              NetworkImage(vendor['shopImage']),
-                                          fit: BoxFit.cover))),
-                              Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Container(
-                                        height: 125,
-                                        width: 125,
-                                        decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                                color: Colors.white, width: 3),
-                                            image: DecorationImage(
-                                                image: NetworkImage(
-                                                    vendor['logo']),
-                                                fit: BoxFit.cover)))
-                                  ])
-                            ]))),
-                    ListTile(
-                        dense: true,
-                        isThreeLine: true,
-                        leading: const Icon(Icons.store),
-                        title: Text(vendor['businessName'],
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: FittedBox(
-                            child: Text('Vendor ID:\n${vendor['vendorID']}'))),
-                    ListTile(
-                        dense: true,
-                        leading: const Icon(Icons.perm_phone_msg),
-                        title: Text(vendor['mobile']),
-                        subtitle: Text(vendor['email'])),
-                    ListTile(
-                        dense: true,
-                        leading: const Icon(Icons.location_on),
-                        title: Text(vendor['address']),
-                        subtitle: Text(vendor['landMark'])),
-                    ListTile(
-                        dense: true,
-                        leading: const Icon(Icons.date_range),
-                        title: const Text('REGISTERED ON:'),
-                        subtitle:
-                            Text(dateTimeToString(vendor['registeredOn'])))
-                  ]),
-                  actions: [
-                    TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('OK'))
-                  ]);
-            }
-            return emptyWidget('VENDOR NOT FOUND');
-          }));
+  
 }

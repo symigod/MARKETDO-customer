@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/screens/products/details.product.dart';
@@ -59,9 +60,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                       child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(50),
-                                          child: Image.network(product['imageURL'],
+                                          child: CachedNetworkImage(
+                                              imageUrl: product['imageURL'],
                                               fit: BoxFit.cover))),
-                                  title: Text(product['productName']),
+                                  title: Text(product['productName'],
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold)),
                                   subtitle: Text(
                                       'P ${product['regularPrice'].toDouble().toStringAsFixed(2)}',
                                       style:
