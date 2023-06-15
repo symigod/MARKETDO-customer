@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/screens/authentication/login.dart';
 import 'package:marketdo_app/screens/main.screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:marketdo_app/screens/authentication/onboarding.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -30,13 +31,16 @@ void main() async {
   runApp(const MyApp());
 }
 
-void updateCustomerOnlineStatus(bool isOnline) => customersCollection
-    .doc(authID)
-    .update({'isOnline': isOnline})
-    .then((value) =>
-        isOnline == true ? print('CUSTOMER ONLINE') : print('CUSTOMER OFFLINE'))
-    .catchError(
-        (error) => print('Failed to update customer online status: $error'));
+void updateCustomerOnlineStatus(String? authID, bool isOnline) {
+  customersCollection
+      .doc(authID)
+      .update({'isOnline': isOnline})
+      .then((value) => isOnline == true
+          ? print('CUSTOMER ONLINE')
+          : print('CUSTOMER OFFLINE'))
+      .catchError(
+          (error) => print('Failed to update customer online status: $error'));
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -49,7 +53,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    if (FirebaseAuth.instance.currentUser != null) {
+      WidgetsBinding.instance.addObserver(this);
+    }
   }
 
   @override
@@ -63,9 +69,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      updateCustomerOnlineStatus(true);
+      updateCustomerOnlineStatus(authID, true);
     } else {
-      updateCustomerOnlineStatus(false);
+      updateCustomerOnlineStatus(authID, false);
     }
   }
 
@@ -73,10 +79,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) => MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(primarySwatch: _marketDoGreen, fontFamily: 'Lato'),
-          initialRoute: SplashScreen.id,
+          home: const SplashScreen(),
           builder: EasyLoading.init(),
           routes: {
-            SplashScreen.id: (context) => const SplashScreen(),
             OnBoardingScreen.id: (context) => const OnBoardingScreen(),
             LoginScreen.id: (context) => const LoginScreen(),
             MainScreen.id: (context) => const MainScreen()
@@ -113,9 +118,14 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
         backgroundColor: Colors.white,
         body: Center(
-            child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset('assets/images/marketdoLogo.png',
-                    height: 50, width: 60))));
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Image.asset('assets/images/marketdoLogo.png',
+              height: 100, width: 100),
+          const SizedBox(height: 10),
+          const Text('MarketDo\nCustomer',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 30, fontWeight: FontWeight.bold, letterSpacing: 2))
+        ])));
   }
 }

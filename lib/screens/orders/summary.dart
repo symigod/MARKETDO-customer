@@ -342,13 +342,13 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                       'Payment: P ${totalPayment.toStringAsFixed(2)}',
                       'Make sure everything is correct. Once order is placed, you cannot undo it. Do you want to continue?',
                       () async {
-                    FirebaseService _fbService = FirebaseService();
+                    FirebaseService fbService = FirebaseService();
                     EasyLoading.show(status: 'Placing order...');
                     try {
                       final newOrder = ordersCollection.doc();
                       String orderID = newOrder.id;
                       if (attachment != null) {
-                        _fbService
+                        fbService
                             .uploadImage(attachment,
                                 'attachments/gcash/$orderID/${attachment!.name}')
                             .then((String? url) {

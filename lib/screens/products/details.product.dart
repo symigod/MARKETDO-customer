@@ -412,22 +412,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           .get()
           .then((QuerySnapshot querySnapshot) {
         for (var cart in querySnapshot.docs) {
-          late List<dynamic> _productIDs;
-          late List<dynamic> _payments;
-          late List<dynamic> _unitsBought;
+          late List<dynamic> productIDs;
+          late List<dynamic> payments;
+          late List<dynamic> unitsBought0;
           Map<String, dynamic>? cartData = cart.data() as Map<String, dynamic>?;
           if (cartData != null && cartData.containsKey('productIDs')) {
-            _productIDs = cartData['productIDs'] as List<dynamic>;
-            _payments = cartData['payments'] as List<dynamic>;
-            _unitsBought = cartData['unitsBought'] as List<dynamic>;
-            _productIDs.add(productID);
-            _payments.add(payment);
-            _unitsBought.add(unitsBought);
+            productIDs = cartData['productIDs'] as List<dynamic>;
+            payments = cartData['payments'] as List<dynamic>;
+            unitsBought0 = cartData['unitsBought'] as List<dynamic>;
+            productIDs.add(productID);
+            payments.add(payment);
+            unitsBought0.add(unitsBought);
           }
           cartsCollection.doc(cart.id).update({
-            'productIDs': _productIDs,
-            'payments': _payments,
-            'unitsBought': _unitsBought,
+            'productIDs': productIDs,
+            'payments': payments,
+            'unitsBought': unitsBought0,
           }).then((value) => showDialog(
                   context: context,
                   builder: (_) =>

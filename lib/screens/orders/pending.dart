@@ -193,13 +193,13 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                             AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return CircularProgressIndicator();
+                            return const CircularProgressIndicator();
                           }
                           if (snapshot.hasError) {
-                            return Text('Error fetching products');
+                            return const Text('Error fetching products');
                           }
                           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                            return Text('No products found');
+                            return const Text('No products found');
                           }
                           List<DocumentSnapshot> productSnapshots =
                               snapshot.data!;
