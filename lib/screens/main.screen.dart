@@ -23,6 +23,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int _selectedIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -41,8 +44,6 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  int _selectedIndex = 0;
-
   final List<Widget> _widgetOptions = const [
     HomeScreen(),
     CategoryScreen(),
@@ -53,7 +54,6 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) => FirebaseAuth.instance.currentUser ==
@@ -70,11 +70,14 @@ class _MainScreenState extends State<MainScreen> {
                       key: _scaffoldKey,
                       appBar: AppBar(
                           elevation: 0,
-                          title: FittedBox(
-                              child: Text(
-                                  'Hi ${snapshot.data!.docs[0]['name']}!',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold))),
+                          title: ListTile(
+                              title: const Text('Welcome to MarketDo',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
+                              subtitle: Text(
+                                  '${snapshot.data!.docs[0]['name']}!',
+                                  style: const TextStyle(color: Colors.white))),
                           actions: [
                             IconButton(
                                 onPressed: () =>

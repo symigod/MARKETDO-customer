@@ -73,7 +73,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .where('productID', isEqualTo: widget.productID)
         .where('customerID', isEqualTo: authID)
         .get();
-
     if (querySnapshot.docs.isNotEmpty) {
       final batch = FirebaseFirestore.instance.batch();
       for (var doc in querySnapshot.docs) {
@@ -439,6 +438,4 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       errorDialog(context, e.toString());
     }
   }
-
-  
 }
