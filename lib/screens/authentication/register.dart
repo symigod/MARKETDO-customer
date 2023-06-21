@@ -1,11 +1,14 @@
 import 'dart:io';
-import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/screens/authentication/landing.dart';
+import 'package:marketdo_app/widgets/dialogs.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -17,13 +20,18 @@ class RegistrationScreen extends StatefulWidget {
 const List<String> list = <String>['Yes', 'No'];
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
+  String googleMapsURL = '';
+  late String latitude = '';
+  late String longitude = '';
+
   final FirebaseService _services = FirebaseService();
   final _formKey = GlobalKey<FormState>();
   final _customerName = TextEditingController();
   final _contactNumber = TextEditingController();
   final _address = TextEditingController();
-  final _email = TextEditingController();
   final _landMark = TextEditingController();
+  final _googleMapsURL = TextEditingController();
+  // ignore: unused_field
   String? _bName;
   XFile? coverPhoto;
   String? displayImage;
@@ -37,18 +45,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           String? label,
           TextInputType? type,
           String? Function(String?)? validator}) =>
-      TextFormField(
-          controller: controller,
-          keyboardType: type,
-          decoration: InputDecoration(
-              labelText: label,
-              prefixText: controller == _contactNumber ? '+63' : null),
-          validator: validator,
-          onChanged: (value) {
-            if (controller == _customerName) {
-              setState(() => _bName = value);
-            }
-          });
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: TextFormField(
+            controller: controller,
+            keyboardType: type,
+            decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: label,
+                prefixText: controller == _contactNumber ? '+63' : null),
+            validator: validator,
+            onChanged: (value) {
+              if (controller == _customerName) {
+                setState(() => _bName = value);
+              }
+            }),
+      );
 
   Future<XFile?> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -72,31 +84,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (_formKey.currentState!.validate()) {
       {
         EasyLoading.show(status: 'Please wait...');
-        _services.uploadImage(coverPhoto, 'customers/$authID/cover.jpg').then(
-            (String? url) {
+        _services
+            .uploadImage(coverPhoto, 'customers/$authID/cover.jpg')
+            .then((String? url) {
           if (url != null) {
             setState(() => displayImage = url);
           }
         }).then((value) => _services
                 .uploadImage(logo, 'customers/$authID/logo.jpg')
                 .then((url) => setState(() => logoUrl = url))
-                .then((value) {
-              return _services.addCustomer(data: {
-                'coverPhoto': displayImage,
-                'logo': logoUrl,
-                'name': _customerName.text,
-                'mobile': '+63${_contactNumber.text}',
-                'address': _address.text,
-                'email': _email.text,
-                'landMark': _landMark.text,
-                'approved': true,
-                'registeredOn': DateTime.now(),
-              }).then((value) {
-                EasyLoading.dismiss();
-                return Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (BuildContext context) => const LandingScreen()));
-              });
-            }));
+                .then((value) => _services.addCustomer(data: {
+                      'address': _address.text,
+                      'coverPhoto': displayImage,
+                      'customerID': authID,
+                      'email': FirebaseAuth.instance.currentUser!.email,
+                      'isOnline': 'true',
+                      'landMark': _landMark.text,
+                      'logo': logoUrl,
+                      'mobile': '+63${_contactNumber.text}',
+                      'name': _customerName.text,
+                      'registeredOn': DateTime.now(),
+                    }).then((value) {
+                      EasyLoading.dismiss();
+                      return Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  const LandingScreen()));
+                    })));
       }
     }
   }
@@ -110,72 +124,71 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               child: Column(children: [
             SizedBox(
                 height: 240,
-                child: Stack(children: [
+                child: Stack(alignment: Alignment.center, children: [
                   coverPhoto == null
-                      ? Container(
-                          color: Colors.greenAccent,
-                          height: 240,
-                          child: TextButton(
-                              child: Center(
-                                  child: Text('Tap to add cover photo',
-                                      style: TextStyle(
-                                          color: Colors.grey.shade800))),
-                              onPressed: () => _pickImage().then((value) =>
-                                  setState(() => coverPhoto = value))))
+                      ? Container(color: Colors.greenAccent, height: 240)
                       : InkWell(
                           onTap: () => _pickImage().then(
                               (value) => setState(() => coverPhoto = value)),
                           child: Container(
+                              padding: const EdgeInsets.all(20),
                               height: 240,
                               decoration: BoxDecoration(
-                                  color: Colors.greenAccent,
                                   image: DecorationImage(
-                                      opacity: 100,
                                       image: FileImage(File(coverPhoto!.path)),
                                       fit: BoxFit.cover)))),
-                  SizedBox(
-                      height: 80,
-                      child: AppBar(
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                          actions: [
-                            IconButton(
-                                onPressed: () =>
-                                    FirebaseAuth.instance.signOut(),
-                                icon: const Icon(Icons.exit_to_app))
-                          ])),
-                  Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                InkWell(
-                                    onTap: () => _pickImage().then((value) =>
-                                        setState(() => logo = value)),
-                                    child: Card(
-                                        elevation: 4,
-                                        child: logo == null
-                                            ? const SizedBox(
-                                                height: 50,
-                                                width: 50,
-                                                child: Center(child: Text('+')))
-                                            : ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(4),
-                                                child: SizedBox(
-                                                    height: 50,
-                                                    width: 50,
-                                                    child: Image.file(
-                                                        File(logo!.path)))))),
-                                const SizedBox(width: 10),
-                                Text(_bName == null ? '' : _bName!,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        fontSize: 20))
-                              ])))
+                  Row(children: [
+                    const SizedBox(width: 20),
+                    Stack(children: [
+                      logo == null
+                          ? Container(
+                              height: 150,
+                              width: 150,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border:
+                                    Border.all(color: Colors.white, width: 3),
+                              ),
+                              child: const Center(
+                                  child: Text('YOUR\nPROFILE\nPICTURE',
+                                      textAlign: TextAlign.center)))
+                          : Container(
+                              height: 150,
+                              width: 150,
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border:
+                                      Border.all(color: Colors.white, width: 3),
+                                  image: DecorationImage(
+                                      image: FileImage(File(logo!.path)),
+                                      fit: BoxFit.cover))),
+                      Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                              onTap: () => _pickImage().then(
+                                  (value) => setState(() => logo = value)),
+                              child: Container(
+                                  decoration: const BoxDecoration(
+                                      color: Colors.blue,
+                                      shape: BoxShape.circle),
+                                  padding: const EdgeInsets.all(8),
+                                  child: const Icon(Icons.camera_alt,
+                                      color: Colors.white))))
+                    ])
+                  ]),
+                  Positioned(
+                      bottom: 10,
+                      right: 10,
+                      child: TextButton(
+                          style: TextButton.styleFrom(
+                              backgroundColor: Colors.white.withOpacity(0.8)),
+                          onPressed: () => _pickImage().then(
+                              (value) => setState(() => coverPhoto = value)),
+                          child: const Text('Edit cover photo',
+                              style: TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.bold))))
                 ])),
             Padding(
                 padding: const EdgeInsets.fromLTRB(30, 8, 30, 8),
@@ -199,27 +212,30 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       validator: (value) =>
                           value!.isEmpty ? 'Enter Address' : null),
                   _formField(
-                      controller: _email,
-                      label: 'Email Address',
-                      type: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Enter email';
-                        }
-                        bool isValid = (EmailValidator.validate(value));
-                        if (isValid == false) {
-                          return 'Invalid Email';
-                        }
-                        return null;
-                      }),
-                  const SizedBox(height: 10),
-                  _formField(
                       controller: _landMark,
                       label: 'Landmark',
                       type: TextInputType.text,
                       validator: (value) =>
                           value!.isEmpty ? 'Enter a Landmark' : null),
-                  const SizedBox(height: 10)
+                  ElevatedButton(
+                      onPressed: () => getCurrentLocation().then((value) {
+                            latitude = value.latitude.toString();
+                            longitude = value.longitude.toString();
+                            setState(() {
+                              googleMapsURL =
+                                  'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+                              _googleMapsURL.text = googleMapsURL;
+                            });
+                            liveLocation();
+                          }),
+                      child: const Text('Set my location')),
+                  if (googleMapsURL.isNotEmpty)
+                    _formField(
+                        label: 'Google Maps URL', controller: _googleMapsURL),
+                  if (latitude.isNotEmpty && longitude.isNotEmpty)
+                    ElevatedButton(
+                        onPressed: () => openGoogleMaps(latitude, longitude),
+                        child: const Text('Check on Google Maps'))
                 ]))
           ])),
           persistentFooterButtons: [
@@ -231,4 +247,51 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           onPressed: _saveToDB, child: const Text('Register'))))
             ])
           ]));
+
+  Future<Position> getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error(
+          'Location service is disabled. Please enable location service.');
+    }
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permission denied.');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permission permanently denied. Please enable location service.');
+    }
+
+    return await Geolocator.getCurrentPosition();
+  }
+
+  void liveLocation() {
+    LocationSettings locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.high, distanceFilter: 100);
+    Geolocator.getPositionStream(locationSettings: locationSettings)
+        .listen((position) {
+      latitude = position.latitude.toString();
+      longitude = position.longitude.toString();
+    });
+  }
+
+  Future<void> openGoogleMaps(String latitude, longitude) async => showDialog(
+      context: context,
+      builder: (_) => confirmDialog(context, 'CHECK ON GOOGLE MAPS',
+              'If the location is correct, tap on "Share" to copy your location and paste it in "Google Maps URL" field.',
+              () async {
+            setState(() => googleMapsURL =
+                'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
+            await canLaunchUrl(Uri.parse(googleMapsURL))
+                ? await launchUrlString(googleMapsURL)
+                : showDialog(
+                    context: context,
+                    builder: (_) =>
+                        errorDialog(context, 'Invalid Google Maps URL!'));
+          }));
 }

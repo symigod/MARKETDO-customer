@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -35,13 +36,23 @@ void main() async {
 
 void updateCustomerOnlineStatus(String? authID, bool isOnline) {
   customersCollection
-      .doc(authID)
-      .update({'isOnline': isOnline})
-      .then((value) => isOnline == true
-          ? print('CUSTOMER ONLINE')
-          : print('CUSTOMER OFFLINE'))
-      .catchError(
-          (error) => print('Failed to update customer online status: $error'));
+    .doc(authID)
+    .get()
+    .then((customer) {
+  if (customer.exists) {
+    customersCollection
+        .doc(authID)
+        .update({'isOnline': isOnline})
+        .then((value) => isOnline == true
+            ? print('CUSTOMER ONLINE')
+            : print('CUSTOMER OFFLINE'))
+        .catchError((error) =>
+            print('Failed to update customer online status: $error'));
+  }
+})
+// ignore: invalid_return_type_for_catch_error
+.catchError((error) => print('Failed to retrieve document: $error'));
+
 }
 
 class MyApp extends StatefulWidget {
@@ -52,28 +63,45 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  StreamSubscription<DocumentSnapshot>? customerSubscription;
+
   @override
   void initState() {
     super.initState();
     if (FirebaseAuth.instance.currentUser != null) {
+      authID = FirebaseAuth.instance.currentUser!.uid;
       WidgetsBinding.instance.addObserver(this);
+      customerSubscription =
+          customersCollection.doc(authID).snapshots().listen((customer) {
+        if (customer.exists) {
+          print('CUSTOMER $customer');
+          if (WidgetsBinding.instance.lifecycleState ==
+              AppLifecycleState.resumed) {
+            updateCustomerOnlineStatus(authID, true);
+          } else {
+            updateCustomerOnlineStatus(authID, false);
+          }
+        }
+      });
     }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    customerSubscription?.cancel();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-
-    if (state == AppLifecycleState.resumed) {
-      updateCustomerOnlineStatus(authID, true);
-    } else {
-      updateCustomerOnlineStatus(authID, false);
+    if (authID != null) {
+      if (state == AppLifecycleState.resumed) {
+        updateCustomerOnlineStatus(authID!, true);
+      } else {
+        updateCustomerOnlineStatus(authID!, false);
+      }
     }
   }
 

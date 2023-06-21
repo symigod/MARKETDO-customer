@@ -8,21 +8,19 @@ class LandingScreen extends StatelessWidget {
   const LandingScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: StreamBuilder(
-            stream: customersCollection.doc(authID).snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return errorWidget(snapshot.error.toString());
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return loadingWidget();
-              }
-              if (snapshot.hasData) {
-                return const MainScreen();
-              }
-              return const RegistrationScreen();
-            }));
-  }
+  Widget build(BuildContext context) => Scaffold(
+      body: StreamBuilder(
+          stream: customersCollection.doc(authID).snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return errorWidget(snapshot.error.toString());
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return loadingWidget();
+            }
+            if (snapshot.data!.exists) {
+              return const MainScreen();
+            }
+            return const RegistrationScreen();
+          }));
 }

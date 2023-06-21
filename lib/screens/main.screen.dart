@@ -29,20 +29,27 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    if (FirebaseAuth.instance.currentUser == null) {
-      Timer(
-          const Duration(seconds: 1),
-          () => Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const LoginScreen()),
-              (route) => false));
-    } else {
-      updateCustomerOnlineStatus(authID, true);
-    }
+    checkCustomerInDB();
     if (widget.index != null) {
       setState(() => _selectedIndex = widget.index!);
     }
   }
+
+  checkCustomerInDB() => customersCollection
+      .doc(authID)
+      .get()
+      .then((customer) => customer.exists
+          ? null
+          : FirebaseAuth.instance.currentUser == null
+              ? Timer(
+                  const Duration(microseconds: 1),
+                  () => Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      (route) => false))
+              : updateCustomerOnlineStatus(authID, true))
+// ignore: invalid_return_type_for_catch_error
+      .catchError((error) => print('Failed to retrieve document: $error'));
 
   final List<Widget> _widgetOptions = const [
     HomeScreen(),
@@ -65,6 +72,12 @@ class _MainScreenState extends State<MainScreen> {
                   .where('customerID', isEqualTo: authID)
                   .snapshots(),
               builder: (context, snapshot) {
+                if(snapshot.hasError) {
+                  return errorWidget(snapshot.error.toString());
+                }
+                if(snapshot.connectionState == ConnectionState.waiting) {
+                  return loadingWidget();
+                }
                 if (snapshot.hasData) {
                   return Scaffold(
                       key: _scaffoldKey,
