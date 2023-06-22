@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/firebase.services.dart';
@@ -72,10 +71,10 @@ class _MainScreenState extends State<MainScreen> {
                   .where('customerID', isEqualTo: authID)
                   .snapshots(),
               builder: (context, snapshot) {
-                if(snapshot.hasError) {
+                if (snapshot.hasError) {
                   return errorWidget(snapshot.error.toString());
                 }
-                if(snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return loadingWidget();
                 }
                 if (snapshot.hasData) {
@@ -92,15 +91,21 @@ class _MainScreenState extends State<MainScreen> {
                                   '${snapshot.data!.docs[0]['name']}!',
                                   style: const TextStyle(color: Colors.white))),
                           actions: [
-                            IconButton(
-                                onPressed: () =>
+                            GestureDetector(
+                                onTap: () =>
                                     _scaffoldKey.currentState?.openEndDrawer(),
-                                icon: ClipRRect(
-                                    borderRadius: BorderRadius.circular(50),
-                                    child: CachedNetworkImage(
-                                        imageUrl: snapshot.data!.docs[0]
-                                            ['logo'],
-                                        fit: BoxFit.cover)))
+                                child: Container(
+                                    height: 50,
+                                    width: 50,
+                                    margin: const EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                            color: Colors.white, width: 1),
+                                        image: DecorationImage(
+                                            image: NetworkImage(
+                                                snapshot.data!.docs[0]['logo']),
+                                            fit: BoxFit.cover))))
                           ]),
                       endDrawer: const CustomDrawer(),
                       floatingActionButton:

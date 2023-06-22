@@ -72,6 +72,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         content: Text(message),
         action: SnackBarAction(
             label: 'OK',
+            textColor: Colors.white,
             onPressed: () => ScaffoldMessenger.of(context).clearSnackBars())));
   }
 
@@ -100,6 +101,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       'email': FirebaseAuth.instance.currentUser!.email,
                       'isOnline': 'true',
                       'landMark': _landMark.text,
+                      'location': _googleMapsURL.text,
                       'logo': logoUrl,
                       'mobile': '+63${_contactNumber.text}',
                       'name': _customerName.text,
@@ -208,7 +210,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   _formField(
                       controller: _address,
                       label: 'Address',
-                      type: TextInputType.phone,
+                      type: TextInputType.text,
                       validator: (value) =>
                           value!.isEmpty ? 'Enter Address' : null),
                   _formField(
@@ -239,16 +241,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ]))
           ])),
           persistentFooterButtons: [
-            Row(children: [
-              Expanded(
-                  child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton(
-                          onPressed: _saveToDB, child: const Text('Register'))))
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              Container(
+                  width: 120,
+                  padding: const EdgeInsets.all(10),
+                  child: ElevatedButton(
+                      style: TextButton.styleFrom(
+                          backgroundColor: Colors.red.shade900),
+                      onPressed: () => FirebaseAuth.instance.signOut(),
+                      child: const Text('Logout'))),
+              Container(
+                  width: 120,
+                  padding: const EdgeInsets.all(10),
+                  child: ElevatedButton(
+                      onPressed: _saveToDB, child: const Text('Register')))
             ])
           ]));
 
   Future<Position> getCurrentLocation() async {
+    EasyLoading.show();
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return Future.error(
@@ -266,7 +277,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       return Future.error(
           'Location permission permanently denied. Please enable location service.');
     }
-
+    EasyLoading.dismiss();
     return await Geolocator.getCurrentPosition();
   }
 
