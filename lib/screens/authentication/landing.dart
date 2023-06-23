@@ -5,6 +5,7 @@ import 'package:marketdo_app/screens/authentication/register.dart';
 import 'package:marketdo_app/widgets/snapshots.dart';
 
 class LandingScreen extends StatelessWidget {
+  static const String id = 'landing-screen';
   const LandingScreen({Key? key}) : super(key: key);
 
   @override

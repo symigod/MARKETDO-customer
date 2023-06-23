@@ -5,6 +5,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:marketdo_app/firebase.services.dart';
+import 'package:marketdo_app/main.dart';
 import 'package:marketdo_app/screens/authentication/landing.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -248,7 +249,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   child: ElevatedButton(
                       style: TextButton.styleFrom(
                           backgroundColor: Colors.red.shade900),
-                      onPressed: () => FirebaseAuth.instance.signOut(),
+                      onPressed: () => FirebaseAuth.instance
+                          .signOut()
+                          .then((value) =>
+                              updateCustomerOnlineStatus(authID, false))
+                          .then((value) => setState(
+                              () => FirebaseAuth.instance.currentUser == null)),
                       child: const Text('Logout'))),
               Container(
                   width: 120,

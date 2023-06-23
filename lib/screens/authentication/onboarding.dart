@@ -16,7 +16,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   double scrollerPosition = 0;
   final store = GetStorage();
 
-  OnButtonPressed(context) {
+  onButtonPressed(context) {
     store.write('onBoarding', true);
     return Navigator.pushReplacementNamed(context, MainScreen.id);
   }
@@ -128,11 +128,11 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                             backgroundColor:
                                 MaterialStateProperty.all(Colors.deepOrange)),
                         child: const Text('Start Shopping'),
-                        onPressed: () => OnButtonPressed(context)))
+                        onPressed: () => onButtonPressed(context)))
                 : TextButton(
                     child: const Text('SKIP TO THE APP >',
                         style: TextStyle(fontSize: 20, color: Colors.white)),
-                    onPressed: () => OnButtonPressed(context)),
+                    onPressed: () => onButtonPressed(context)),
             const SizedBox(height: 20)
           ]))
     ]));
