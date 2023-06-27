@@ -2,7 +2,7 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:marketdo_app/screens/main.screen.dart';
+import 'package:marketdo_app/screens/authentication/login.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({Key? key}) : super(key: key);
@@ -18,7 +18,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   onButtonPressed(context) {
     store.write('onBoarding', true);
-    return Navigator.pushReplacementNamed(context, MainScreen.id);
+    return Navigator.pushReplacementNamed(context, LoginScreen.id);
   }
 
   @override

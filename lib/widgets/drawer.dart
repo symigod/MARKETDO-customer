@@ -125,6 +125,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           builder: (_) => confirmDialog(
                                   context, 'LOGOUT', 'Do you want to continue?',
                                   () {
+                                updateCustomerOnlineStatus(authID, false);
                                 FirebaseAuth.instance.signOut();
                                 Navigator.pushReplacementNamed(
                                     context, LoginScreen.id);

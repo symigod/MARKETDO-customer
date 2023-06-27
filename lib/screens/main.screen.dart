@@ -27,28 +27,29 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-    super.initState();
     checkCustomerInDB();
     if (widget.index != null) {
       setState(() => _selectedIndex = widget.index!);
     }
+    super.initState();
   }
 
-  checkCustomerInDB() => customersCollection
-      .doc(authID)
-      .get()
-      .then((customer) => customer.exists
-          ? null
-          : FirebaseAuth.instance.currentUser == null
-              ? Timer(
-                  const Duration(microseconds: 1),
-                  () => Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false))
-              : updateCustomerOnlineStatus(authID, true))
-// ignore: invalid_return_type_for_catch_error
-      .catchError((error) => print('Failed to retrieve document: $error'));
+  Future<void> checkCustomerInDB() async {
+    if (authID != null) {
+      await customersCollection
+          .doc(authID)
+          .get()
+          .then((customer) => customer.exists
+              ? null
+              : FirebaseAuth.instance.currentUser == null
+                  ? Timer(
+                      const Duration(microseconds: 1),
+                      () => Navigator.pushReplacementNamed(
+                          context, LoginScreen.id))
+                  : updateCustomerOnlineStatus(authID, true))
+          .catchError((error) => print('Failed to retrieve document: $error'));
+    }
+  }
 
   final List<Widget> _widgetOptions = const [
     HomeScreen(),
@@ -81,6 +82,7 @@ class _MainScreenState extends State<MainScreen> {
                   return Scaffold(
                       key: _scaffoldKey,
                       appBar: AppBar(
+                          automaticallyImplyLeading: false,
                           elevation: 0,
                           title: ListTile(
                               title: const Text('Welcome to MarketDo',
@@ -101,7 +103,7 @@ class _MainScreenState extends State<MainScreen> {
                                     decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                            color: Colors.white, width: 1),
+                                            color: Colors.white, width: 2),
                                         image: DecorationImage(
                                             image: NetworkImage(
                                                 snapshot.data!.docs[0]['logo']),
@@ -238,6 +240,10 @@ class _MainScreenState extends State<MainScreen> {
                           onTap: _onItemTapped,
                           type: BottomNavigationBarType.fixed));
                 }
+                // Timer(
+                //     const Duration(microseconds: 1),
+                //     () => Navigator.pushReplacementNamed(
+                //         context, LoginScreen.id));
                 return loadingWidget();
               }));
 }
