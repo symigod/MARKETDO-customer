@@ -54,13 +54,10 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _widgetOptions = const [
     HomeScreen(),
     CategoryScreen(),
-    // MessageScreen(),
     CartScreen(),
     OrderScreen(),
     FavoritesScreen()
   ];
-
-  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
   @override
   Widget build(BuildContext context) => FirebaseAuth.instance.currentUser ==
@@ -234,10 +231,11 @@ class _MainScreenState extends State<MainScreen> {
                                 icon: Icon(Icons.favorite), label: 'Favorites')
                           ],
                           currentIndex: _selectedIndex,
-                          selectedItemColor: Colors.yellow,
                           showUnselectedLabels: true,
+                          selectedItemColor: Colors.yellow,
                           unselectedItemColor: Colors.white,
-                          onTap: _onItemTapped,
+                          onTap: (int index) =>
+                              setState(() => _selectedIndex = index),
                           type: BottomNavigationBarType.fixed));
                 }
                 // Timer(

@@ -13,6 +13,7 @@ class ProductModel {
   final regularPrice;
   final shippingCharge;
   final stockOnHand;
+  final subcategory;
   final unit;
   final vendorID;
 
@@ -27,6 +28,7 @@ class ProductModel {
     required this.regularPrice,
     required this.shippingCharge,
     required this.stockOnHand,
+    required this.subcategory,
     required this.unit,
     required this.vendorID,
   });
@@ -44,6 +46,7 @@ class ProductModel {
       regularPrice: data['regularPrice'] ?? 0.0,
       shippingCharge: data['shippingCharge'] ?? 0.0,
       stockOnHand: data['stockOnHand'] ?? 0.0,
+      subcategory: data['subcategory'] ?? '',
       unit: data['unit'] ?? '',
       vendorID: data['vendorID'] ?? '',
     );
@@ -60,6 +63,7 @@ class ProductModel {
         'regularPrice': regularPrice,
         'shippingCharge': shippingCharge,
         'stockOnHand': stockOnHand,
+        'subcategory': subcategory,
         'unit': unit,
         'vendorID': vendorID,
       };

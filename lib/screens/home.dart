@@ -85,6 +85,6 @@ class _SearchWidgetState extends State<SearchWidget> {
               context,
               MaterialPageRoute(
                   builder: (BuildContext context) =>
-                      SearchScreen(searchText: _search.text)))
+                      SearchScreen(searchText: _search.text.toUpperCase())))
           .then((value) => _search.text = '');
 }

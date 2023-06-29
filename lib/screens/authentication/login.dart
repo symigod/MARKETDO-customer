@@ -22,8 +22,8 @@ class LoginScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
                       action == AuthAction.signIn
-                          ? 'Welcome to MarketDo!\nPlease sign in to continue.'
-                          : 'Welcome to MarketDo!\nPlease create an account to continue',
+                          ? 'Welcome Customer!\nPlease sign in to continue.'
+                          : 'Welcome Customer!\nPlease create an account to continue',
                       style: TextStyle(
                           color: Colors.green.shade900,
                           fontWeight: FontWeight.bold))),

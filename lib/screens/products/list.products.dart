@@ -5,14 +5,19 @@ import 'package:marketdo_app/models/product.model.dart';
 import 'package:marketdo_app/screens/products/details.product.dart';
 import 'package:marketdo_app/widgets/snapshots.dart';
 
-class HomeProductList extends StatelessWidget {
+class HomeProductList extends StatefulWidget {
   const HomeProductList({super.key});
 
+  @override
+  State<HomeProductList> createState() => _HomeProductListState();
+}
+
+class _HomeProductListState extends State<HomeProductList> {
   @override
   Widget build(BuildContext context) => Container(
       color: Colors.grey.shade200,
       child: StreamBuilder(
-          stream: productsCollection.snapshots(),
+          stream: productsCollection.orderBy('productName').snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return errorWidget(snapshot.error.toString());
@@ -52,7 +57,7 @@ class HomeProductList extends StatelessWidget {
                                         child: CachedNetworkImage(
                                             imageUrl: product.imageURL,
                                             fit: BoxFit.cover))),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 5),
                                 Text(product.productName,
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(fontSize: 10),

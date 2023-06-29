@@ -138,7 +138,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               dense: true,
                               leading: const Icon(Icons.category),
                               title: Text(product.category),
-                              subtitle: Text(product.description),
+                              subtitle: Text(product.subcategory),
                               trailing: IconButton(
                                   icon: StreamBuilder(
                                       stream: favoritesCollection
@@ -183,7 +183,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               title:
                                   Text('Regular Price (per ${product.unit})'),
                               trailing: Text(
-                                  'P ${product.regularPrice.toStringAsFixed(2)}',
+                                  'P ${numberToString(product.regularPrice.toDouble())}',
                                   style: const TextStyle(
                                       color: Colors.red,
                                       fontWeight: FontWeight.bold))),
@@ -193,7 +193,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               leading: const Icon(Icons.delivery_dining),
                               title: const Text('Delivery Fee'),
                               trailing: Text(
-                                  'P ${product.shippingCharge.toStringAsFixed(2)}',
+                                'P ${numberToString(product.shippingCharge.toDouble())}',
                                   style: const TextStyle(
                                       color: Colors.red,
                                       fontWeight: FontWeight.bold))),
