@@ -62,7 +62,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                     border: Border.all(
                                         color: vendor['isOnline']
                                             ? Colors.green
-                                            : Colors.red,
+                                            : Colors.grey,
                                         width: 2)),
                                 child: Container(
                                     decoration: BoxDecoration(
@@ -95,7 +95,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                           const TextStyle(color: Colors.blue))
                                 ])),
                             trailing: Text(
-                                'P ${orders['totalPayment'].toStringAsFixed(2)}',
+                                'P ${numberToString(orders['totalPayment'].toDouble())}',
                                 style: const TextStyle(
                                     color: Colors.red,
                                     fontWeight: FontWeight.bold)));
@@ -158,7 +158,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                           border: Border.all(
                                               color: vendor['isOnline']
                                                   ? Colors.green.shade900
-                                                  : Colors.red,
+                                                  : Colors.grey,
                                               width: 2)),
                                       child: Container(
                                           decoration: BoxDecoration(
@@ -206,7 +206,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                           List<ProductModel> productList = productSnapshots
                               .map((doc) => ProductModel.fromFirestore(doc))
                               .toList();
-
                           return ExpansionTile(
                               leading: const Icon(Icons.shopping_bag),
                               title: const Text('Products:'),
@@ -248,7 +247,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                                             FontWeight.bold))
                                               ])),
                                           subtitle: Text(product.description),
-                                          trailing: Text('$payments',
+                                          trailing: Text(
+                                              'P ${numberToString(payments)}',
                                               style: const TextStyle(
                                                   color: Colors.red,
                                                   fontWeight:
@@ -260,7 +260,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                         leading: const Icon(Icons.payments),
                         title: const Text('Total Payment:'),
                         trailing: Text(
-                            'P ${order['totalPayment'].toStringAsFixed(2)}',
+                            'P ${numberToString(order['totalPayment'].toDouble())}',
                             style: const TextStyle(
                                 color: Colors.red,
                                 fontWeight: FontWeight.bold)))

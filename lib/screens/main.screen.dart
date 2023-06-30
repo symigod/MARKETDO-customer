@@ -5,7 +5,6 @@ import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/main.dart';
 import 'package:marketdo_app/screens/authentication/login.dart';
 import 'package:marketdo_app/screens/orders/cart.dart';
-import 'package:marketdo_app/screens/categories/main.categories.dart';
 import 'package:marketdo_app/screens/favorites.dart';
 import 'package:marketdo_app/screens/home.dart';
 import 'package:marketdo_app/screens/orders/main.orders.dart';
@@ -53,7 +52,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _widgetOptions = const [
     HomeScreen(),
-    CategoryScreen(),
+    // CategoryScreen(),
     CartScreen(),
     OrderScreen(),
     FavoritesScreen()
@@ -89,6 +88,10 @@ class _MainScreenState extends State<MainScreen> {
                               subtitle: Text(
                                   '${snapshot.data!.docs[0]['name']}!',
                                   style: const TextStyle(color: Colors.white))),
+                          bottom: PreferredSize(
+                              preferredSize:
+                                  Size(MediaQuery.of(context).size.width, 60),
+                              child: const SearchWidget()),
                           actions: [
                             GestureDetector(
                                 onTap: () =>
@@ -119,9 +122,9 @@ class _MainScreenState extends State<MainScreen> {
                           items: [
                             const BottomNavigationBarItem(
                                 icon: Icon(Icons.home), label: 'Home'),
-                            const BottomNavigationBarItem(
-                                icon: Icon(Icons.category),
-                                label: 'Categories'),
+                            // const BottomNavigationBarItem(
+                            //     icon: Icon(Icons.category),
+                            //     label: 'Categories'),
                             BottomNavigationBarItem(
                                 icon: Stack(children: [
                                   const Icon(Icons.shopping_cart),

@@ -68,22 +68,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String fraction = '';
 
   Future<void> addToFavorites() async {
-    final newFavorite = favoritesCollection.doc();
-    final querySnapshot = await favoritesCollection
-        .where('productID', isEqualTo: widget.productID)
-        .where('customerID', isEqualTo: authID)
-        .get();
+    final newFavorite = favoritesCollection.doc(authID);
+    final querySnapshot =
+        await favoritesCollection.where('favoriteOf', isEqualTo: authID).get();
     if (querySnapshot.docs.isNotEmpty) {
       final batch = FirebaseFirestore.instance.batch();
       for (var doc in querySnapshot.docs) {
-        batch.delete(doc.reference);
+        final existingProductIDs = List<String>.from(doc['productIDs']);
+        if (existingProductIDs.contains(widget.productID)) {
+          existingProductIDs.remove(widget.productID);
+          batch.update(doc.reference, {'productIDs': existingProductIDs});
+        } else {
+          existingProductIDs.add(widget.productID);
+          batch.update(doc.reference, {'productIDs': existingProductIDs});
+        }
       }
       await batch.commit();
     } else {
-      final favoriteData = FavoriteModel(
-          customerID: authID,
-          favoriteID: newFavorite.id,
-          productID: widget.productID);
+      final favoriteData =
+          FavoriteModel(favoriteOf: authID, productIDs: [widget.productID]);
       await newFavorite.set(favoriteData.toFirestore());
     }
   }
@@ -131,51 +134,58 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ListTile(
                               dense: true,
                               leading: const Icon(Icons.info),
-                              title: Text(product.productName),
-                              subtitle: Text(product.description)),
+                              title: Text(product.productName,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              subtitle: Text(product.description),
+                              trailing: IconButton(
+                                  icon: StreamBuilder(
+                                      stream: favoritesCollection
+                                          .where('favoriteOf',
+                                              isEqualTo: authID)
+                                          .snapshots(),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasError) {
+                                          return errorWidget(
+                                              snapshot.error.toString());
+                                        }
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return loadingWidget();
+                                        }
+                                        if (snapshot.hasData) {
+                                          List<FavoriteModel> favoriteModels =
+                                              snapshot.data!.docs
+                                                  .map((doc) => FavoriteModel
+                                                      .fromFirestore(doc))
+                                                  .toList();
+                                          bool isFavorite = false;
+                                          for (var favoriteModel
+                                              in favoriteModels) {
+                                            if (favoriteModel.productIDs
+                                                .contains(widget.productID)) {
+                                              isFavorite = true;
+                                              break;
+                                            }
+                                          }
+                                          isFavorite
+                                              ? const Icon(Icons.favorite,
+                                                  color: Colors.red)
+                                              : const Icon(
+                                                  Icons.favorite_border,
+                                                  color: Colors.grey);
+                                        }
+                                        return const Icon(Icons.favorite_border,
+                                            color: Colors.grey);
+                                      }),
+                                  onPressed: () => addToFavorites())),
                           const Divider(height: 0, thickness: 1),
                           ListTile(
                               dense: true,
                               leading: const Icon(Icons.category),
                               title: Text(product.category),
                               subtitle: Text(product.subcategory),
-                              trailing: IconButton(
-                                  icon: StreamBuilder(
-                                      stream: favoritesCollection
-                                          .where('productID',
-                                              isEqualTo: widget.productID)
-                                          .where('customerID',
-                                              isEqualTo: authID)
-                                          .snapshots(),
-                                      builder: (context, fs) {
-                                        if (fs.hasError) {
-                                          return errorWidget(
-                                              fs.error.toString());
-                                        }
-                                        if (fs.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return loadingWidget();
-                                        }
-                                        if (fs.hasData) {
-                                          List<FavoriteModel> favoriteModel = fs
-                                              .data!.docs
-                                              .map((doc) =>
-                                                  FavoriteModel.fromFirestore(
-                                                      doc))
-                                              .toList();
-                                          if (favoriteModel.isEmpty) {
-                                            return const Icon(
-                                                Icons.favorite_border,
-                                                color: Colors.grey);
-                                          } else {
-                                            return const Icon(Icons.favorite,
-                                                color: Colors.red);
-                                          }
-                                        }
-                                        return const Icon(Icons.favorite_border,
-                                            color: Colors.grey);
-                                      }),
-                                  onPressed: () => addToFavorites())),
+                              trailing: categoryIcon(product.category)),
                           const Divider(height: 0, thickness: 1),
                           ListTile(
                               dense: true,
@@ -193,7 +203,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               leading: const Icon(Icons.delivery_dining),
                               title: const Text('Delivery Fee'),
                               trailing: Text(
-                                'P ${numberToString(product.shippingCharge.toDouble())}',
+                                  'P ${numberToString(product.shippingCharge.toDouble())}',
                                   style: const TextStyle(
                                       color: Colors.red,
                                       fontWeight: FontWeight.bold))),

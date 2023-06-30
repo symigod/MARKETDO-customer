@@ -1,6 +1,7 @@
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:marketdo_app/firebase.services.dart';
 
@@ -29,37 +30,63 @@ class _BannerWidgetState extends State<BannerWidget> {
       });
 
   @override
-  Widget build(BuildContext context) => Stack(children: [
+  Widget build(BuildContext context) => Column(children: [
         Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-            child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: _bannerImage.isEmpty
-                    ? GFShimmer(
-                        showShimmerEffect: true,
-                        mainColor: Colors.grey.shade500,
-                        secondaryColor: Colors.grey.shade400,
-                        child: Container(
-                            color: Colors.grey.shade300,
-                            height: 140,
-                            width: MediaQuery.of(context).size.width))
-                    : Container(
-                        color: Colors.grey.shade200,
-                        height: 140,
-                        width: MediaQuery.of(context).size.width,
-                        child: PageView.builder(
-                            itemCount: _bannerImage.length,
-                            itemBuilder: (BuildContext context, int index) =>
-                                Image.network(_bannerImage[index],
-                                    fit: BoxFit.cover),
-                            onPageChanged: (val) =>
-                                setState(() => scrollPosition = val))))),
-        _bannerImage.isEmpty
-            ? Container()
-            : Positioned(
-                bottom: 10.0,
-                child: DotsIndicatorWidget(
-                    scrollPosition: scrollPosition, itemList: _bannerImage))
+            padding: const EdgeInsets.only(bottom: 10),
+            child: SizedBox(
+                height: 20,
+                width: MediaQuery.of(context).size.width,
+                child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Row(children: [
+                        Icon(IconlyLight.infoSquare, size: 12),
+                        Text('100% Genuine',
+                            style: TextStyle(color: Colors.white, fontSize: 12))
+                      ]),
+                      Row(children: [
+                        Icon(IconlyLight.infoSquare, size: 12),
+                        Text('2 - 3 days return',
+                            style: TextStyle(color: Colors.white, fontSize: 12))
+                      ]),
+                      Row(children: [
+                        Icon(IconlyLight.infoSquare, size: 12),
+                        Text('Trusted Products',
+                            style: TextStyle(color: Colors.white, fontSize: 12))
+                      ])
+                    ]))),
+        Stack(children: [
+          Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: _bannerImage.isEmpty
+                      ? GFShimmer(
+                          showShimmerEffect: true,
+                          mainColor: Colors.grey.shade500,
+                          secondaryColor: Colors.grey.shade400,
+                          child: Container(
+                              color: Colors.grey.shade300,
+                              height: 140,
+                              width: MediaQuery.of(context).size.width))
+                      : Container(
+                          color: Colors.grey.shade200,
+                          height: 140,
+                          width: MediaQuery.of(context).size.width,
+                          child: PageView.builder(
+                              itemCount: _bannerImage.length,
+                              itemBuilder: (BuildContext context, int index) =>
+                                  Image.network(_bannerImage[index],
+                                      fit: BoxFit.cover),
+                              onPageChanged: (val) =>
+                                  setState(() => scrollPosition = val))))),
+          _bannerImage.isEmpty
+              ? Container()
+              : Positioned(
+                  bottom: 10.0,
+                  child: DotsIndicatorWidget(
+                      scrollPosition: scrollPosition, itemList: _bannerImage))
+        ])
       ]);
 }
 

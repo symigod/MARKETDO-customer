@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/screens/products/details.product.dart';
+import 'package:marketdo_app/widgets/dialogs.dart';
 import 'package:marketdo_app/widgets/snapshots.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -67,39 +68,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold)),
                                   subtitle: Text(
-                                      'P ${product['regularPrice'].toDouble().toStringAsFixed(2)}',
-                                      style:
-                                          const TextStyle(color: Colors.red)),
-                                  trailing: SizedBox(
-                                      height: 40,
-                                      width: 40,
-                                      child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(50),
-                                          child: FutureBuilder(
-                                              future: vendorsCollection
-                                                  .where('vendorID',
-                                                      isEqualTo:
-                                                          product['vendorID'])
-                                                  .get(),
-                                              builder: (context, vs) {
-                                                if (vs.hasError) {
-                                                  return errorWidget(
-                                                      ps.error.toString());
-                                                }
-                                                if (vs.connectionState ==
-                                                    ConnectionState.waiting) {
-                                                  return loadingWidget();
-                                                }
-                                                if (vs.data!.docs.isNotEmpty) {
-                                                  final vendor =
-                                                      vs.data!.docs[0];
-                                                  return Image.network(
-                                                      vendor['logo'],
-                                                      fit: BoxFit.cover);
-                                                }
-                                                return loadingWidget();
-                                              }))));
+                                      'P ${numberToString(product['regularPrice'].toDouble())}',
+                                      style: const TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold)),
+                                  trailing: IconButton(
+                                      onPressed: () {},
+                                      icon:
+                                          const Icon(Icons.highlight_remove)));
                             }
                             return emptyWidget('PRODUCT NOT FOUND');
                           });

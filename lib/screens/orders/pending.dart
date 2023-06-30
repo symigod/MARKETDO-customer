@@ -62,7 +62,7 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                                     border: Border.all(
                                         color: vendor['isOnline']
                                             ? Colors.green
-                                            : Colors.red,
+                                            : Colors.grey,
                                         width: 2)),
                                 child: Container(
                                     decoration: BoxDecoration(
@@ -95,7 +95,7 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                                           const TextStyle(color: Colors.blue))
                                 ])),
                             trailing: Text(
-                                'P ${orders['totalPayment'].toStringAsFixed(2)}',
+                                'P ${numberToString(orders['totalPayment'].toDouble())}',
                                 style: const TextStyle(
                                     color: Colors.red,
                                     fontWeight: FontWeight.bold)));
@@ -158,7 +158,7 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                                           border: Border.all(
                                               color: vendor['isOnline']
                                                   ? Colors.green.shade900
-                                                  : Colors.red,
+                                                  : Colors.grey,
                                               width: 2)),
                                       child: Container(
                                           decoration: BoxDecoration(
@@ -248,7 +248,8 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                                                             FontWeight.bold))
                                               ])),
                                           subtitle: Text(product.description),
-                                          trailing: Text('$payments',
+                                          trailing: Text(
+                                              'P ${numberToString(payments)}',
                                               style: const TextStyle(
                                                   color: Colors.red,
                                                   fontWeight:
@@ -260,7 +261,7 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                         leading: const Icon(Icons.payments),
                         title: const Text('Total Payment:'),
                         trailing: Text(
-                            'P ${order['totalPayment'].toStringAsFixed(2)}',
+                            'P ${numberToString(order['totalPayment'].toDouble())}',
                             style: const TextStyle(
                                 color: Colors.red,
                                 fontWeight: FontWeight.bold)))

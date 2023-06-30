@@ -36,24 +36,20 @@ void main() async {
 }
 
 void updateCustomerOnlineStatus(String? authID, bool isOnline) {
-  customersCollection
-    .doc(authID)
-    .get()
-    .then((customer) {
-  if (customer.exists) {
-    customersCollection
-        .doc(authID)
-        .update({'isOnline': isOnline})
-        .then((value) => isOnline == true
-            ? print('CUSTOMER ONLINE')
-            : print('CUSTOMER OFFLINE'))
-        .catchError((error) =>
-            print('Failed to update customer online status: $error'));
-  }
-})
+  customersCollection.doc(authID).get().then((customer) {
+    if (customer.exists) {
+      customersCollection
+          .doc(authID)
+          .update({'isOnline': isOnline})
+          .then((value) => isOnline == true
+              ? print('CUSTOMER ONLINE')
+              : print('CUSTOMER OFFLINE'))
+          .catchError((error) =>
+              print('Failed to update customer online status: $error'));
+    }
+  })
 // ignore: invalid_return_type_for_catch_error
-.catchError((error) => print('Failed to retrieve document: $error'));
-
+      .catchError((error) => print('Failed to retrieve document: $error'));
 }
 
 class MyApp extends StatefulWidget {
@@ -75,7 +71,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       customerSubscription =
           customersCollection.doc(authID).snapshots().listen((customer) {
         if (customer.exists) {
-          print('CUSTOMER $customer');
           if (WidgetsBinding.instance.lifecycleState ==
               AppLifecycleState.resumed) {
             updateCustomerOnlineStatus(authID, true);

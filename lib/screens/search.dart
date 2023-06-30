@@ -21,9 +21,10 @@ class _SearchScreenState extends State<SearchScreen> {
               child: Text('Search results for "${widget.searchText}"'))),
       body: StreamBuilder(
           stream: productsCollection
+              .where('searchKeywords',
+                  arrayContains: widget.searchText.toUpperCase())
               .orderBy('productName')
-              .startAt([widget.searchText.toUpperCase()]).endAt(
-                  ['${widget.searchText.toUpperCase()}\uf8ff']).snapshots(),
+              .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return errorWidget(snapshot.error.toString());
@@ -32,7 +33,8 @@ class _SearchScreenState extends State<SearchScreen> {
               return loadingWidget();
             }
             if (snapshot.data!.docs.isEmpty) {
-              return emptyWidget('NO PRODUCTS FOUND');
+              return emptyWidget(
+                  'NO PRODUCTS FOUND\nTRY SEARCHING THE COMPLETE WORD\n(e.g. "coke", "mismo", etc.)');
             }
             return GridView.builder(
                 shrinkWrap: true,

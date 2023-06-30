@@ -3,26 +3,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FavoriteModel {
-  final customerID;
-  final favoriteID;
-  final productID;
+  final favoriteOf;
+  late final productIDs;
 
-  FavoriteModel(
-      {required this.customerID,
-      required this.favoriteID,
-      required this.productID});
+  FavoriteModel({required this.favoriteOf, required this.productIDs});
 
   factory FavoriteModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = (doc.data() as Map<String, dynamic>);
     return FavoriteModel(
-        customerID: data['customerID'],
-        favoriteID: data['favoriteID'],
-        productID: data['productID']);
+        favoriteOf: data['favoriteOf'], productIDs: data['productIDs']);
   }
 
-  Map<String, dynamic> toFirestore() => {
-        'customerID': customerID,
-        'favoriteID': favoriteID,
-        'productID': productID
-      };
+  Map<String, dynamic> toFirestore() =>
+      {'favoriteOf': favoriteOf, 'productIDs': productIDs};
 }

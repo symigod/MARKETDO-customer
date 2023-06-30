@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/widgets/snapshots.dart';
@@ -141,11 +142,19 @@ viewVendorDetails(context, String vendorID) => showDialog(
                       title: const Text('REGISTERED ON:'),
                       subtitle: Text(dateTimeToString(vendor['registeredOn'])))
                 ]),
-                actionsAlignment: MainAxisAlignment.center,
+                actionsAlignment: MainAxisAlignment.spaceBetween,
                 actions: [
-                  ElevatedButton(
+                  IconButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'))
+                      icon: const Icon(Icons.close, color: Colors.red)),
+                  IconButton(
+                      onPressed: () =>
+                          openURL(context, 'mailto:${vendor['email']}'),
+                      icon: const Icon(Icons.mail, color: Colors.blue)),
+                  IconButton(
+                      onPressed: () =>
+                          openURL(context, 'tel:${vendor['mobile']}'),
+                      icon: const Icon(Icons.call, color: Colors.green)),
                 ]);
           }
           return emptyWidget('VENDOR NOT FOUND');
@@ -201,3 +210,32 @@ void copyToClipboard(context, String copyText) =>
 showSnackbar(BuildContext context) =>
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Text copied!', textAlign: TextAlign.center)));
+
+FaIcon categoryIcon(category) {
+  switch (category) {
+    case 'Clothing and Accessories':
+      category = FontAwesomeIcons.shirt;
+      break;
+
+    case 'Food and Beverages':
+      category = FontAwesomeIcons.utensils;
+      break;
+
+    case 'Household Items':
+      category = FontAwesomeIcons.couch;
+      break;
+
+    case 'Personal Care':
+      category = FontAwesomeIcons.handSparkles;
+      break;
+
+    case 'School and Office Supplies':
+      category = FontAwesomeIcons.folderOpen;
+      break;
+
+    case 'Others':
+      category = FontAwesomeIcons.ellipsis;
+      break;
+  }
+  return FaIcon(category);
+}

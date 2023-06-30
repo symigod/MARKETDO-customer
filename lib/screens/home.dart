@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:marketdo_app/screens/categories/widget.categories.dart';
+import 'package:marketdo_app/screens/products/main.products.dart';
 import 'package:marketdo_app/screens/search.dart';
-import 'package:marketdo_app/widgets/banner.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,14 +12,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) =>
-      Scaffold(backgroundColor: Colors.green, body: homeWidget());
+      const Scaffold(backgroundColor: Colors.green, body: ProductsScreen());
 
-  Widget homeWidget() => ListView(children: const [
-        SearchWidget(),
-        SizedBox(height: 10),
-        BannerWidget(),
-        CategoryWidget()
-      ]);
+  // Widget homeWidget() => ListView(children: const [
+  //       // SearchWidget(),
+  //       // BannerWidget(),
+  //       HomeProductList()
+  //     ]);
 }
 
 class SearchWidget extends StatefulWidget {
@@ -50,33 +47,10 @@ class _SearchWidgetState extends State<SearchWidget> {
                             fillColor: Colors.white,
                             contentPadding:
                                 const EdgeInsets.fromLTRB(8, 5, 8, 0),
-                            hintText: 'Search in Marketdo App',
+                            hintText: 'Search product...',
                             suffixIcon: GestureDetector(
                                 onTap: () => search(),
-                                child: const Icon(Icons.search, size: 20))))))),
-        SizedBox(
-            child: SizedBox(
-                height: 20,
-                width: MediaQuery.of(context).size.width,
-                child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Row(children: [
-                        Icon(IconlyLight.infoSquare, size: 12),
-                        Text('100% Genuine',
-                            style: TextStyle(color: Colors.white, fontSize: 12))
-                      ]),
-                      Row(children: [
-                        Icon(IconlyLight.infoSquare, size: 12),
-                        Text('2 - 3 days return',
-                            style: TextStyle(color: Colors.white, fontSize: 12))
-                      ]),
-                      Row(children: [
-                        Icon(IconlyLight.infoSquare, size: 12),
-                        Text('Trusted Products',
-                            style: TextStyle(color: Colors.white, fontSize: 12))
-                      ])
-                    ])))
+                                child: const Icon(Icons.search, size: 20)))))))
       ]);
 
   search() => _search.text.isEmpty
@@ -85,6 +59,6 @@ class _SearchWidgetState extends State<SearchWidget> {
               context,
               MaterialPageRoute(
                   builder: (BuildContext context) =>
-                      SearchScreen(searchText: _search.text.toUpperCase())))
+                      SearchScreen(searchText: _search.text)))
           .then((value) => _search.text = '');
 }

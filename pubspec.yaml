@@ -41,6 +41,7 @@ dependencies:
   email_validator: ^2.1.17
   flutter_slidable: ^3.0.0
   receipt: ^0.0.1
+  font_awesome_flutter: ^10.5.0
 
 
 dev_dependencies:

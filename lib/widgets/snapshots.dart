@@ -5,4 +5,5 @@ Widget errorWidget(String message) =>
 
 Widget loadingWidget() => const Center(child: CircularProgressIndicator());
 
-Widget emptyWidget(String message) => Center(child: Text(message));
+Widget emptyWidget(String message) =>
+    Center(child: Text(message, textAlign: TextAlign.center));
