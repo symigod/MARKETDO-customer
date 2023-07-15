@@ -101,20 +101,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               stream: productsCollection
                   .where('productID', isEqualTo: widget.productID)
                   .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return errorWidget(snapshot.error.toString());
+              builder: (context, ps) {
+                if (ps.hasError) {
+                  return errorWidget(ps.error.toString());
                 }
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (ps.connectionState == ConnectionState.waiting) {
                   return loadingWidget();
                 }
-                if (snapshot.data!.docs.isEmpty) {
+                if (ps.data!.docs.isEmpty) {
                   return emptyWidget('NO PRODUCTS FOUND');
                 }
                 return ListView.builder(
-                    itemCount: snapshot.data!.docs.length,
+                    itemCount: ps.data!.docs.length,
                     itemBuilder: (context, index) {
-                      List<ProductModel> productModel = snapshot.data!.docs
+                      List<ProductModel> productModel = ps.data!.docs
                           .map((doc) => ProductModel.fromFirestore(doc))
                           .toList();
                       var product = productModel[index];
@@ -144,31 +144,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           .where('favoriteOf',
                                               isEqualTo: authID)
                                           .snapshots(),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.hasError) {
+                                      builder: (context, fs) {
+                                        if (fs.hasError) {
                                           return errorWidget(
-                                              snapshot.error.toString());
+                                              fs.error.toString());
                                         }
-                                        if (snapshot.connectionState ==
+                                        if (fs.connectionState ==
                                             ConnectionState.waiting) {
                                           return loadingWidget();
                                         }
-                                        if (snapshot.hasData) {
+                                        if (fs.hasData) {
                                           List<FavoriteModel> favoriteModels =
-                                              snapshot.data!.docs
+                                              fs.data!.docs
                                                   .map((doc) => FavoriteModel
                                                       .fromFirestore(doc))
                                                   .toList();
-                                          bool isFavorite = false;
-                                          for (var favoriteModel
-                                              in favoriteModels) {
-                                            if (favoriteModel.productIDs
-                                                .contains(widget.productID)) {
-                                              isFavorite = true;
-                                              break;
-                                            }
-                                          }
-                                          isFavorite
+                                          bool isFavorite = favoriteModels.any(
+                                              (model) => model.productIDs
+                                                  .contains(widget.productID));
+                                          return isFavorite
                                               ? const Icon(Icons.favorite,
                                                   color: Colors.red)
                                               : const Icon(

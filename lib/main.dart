@@ -10,9 +10,8 @@ import 'package:marketdo_app/screens/main.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/screens/authentication/onboarding.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:marketdo_app/widgets/dialogs.dart';
 
-String appVersion = dateTimeToString(Timestamp.now());
+String appVersion = 'Jul 15, 2024';
 
 int marketDoGreen = 0xFF1B5E20;
 MaterialColor _marketDoGreen = MaterialColor(marketDoGreen, {
