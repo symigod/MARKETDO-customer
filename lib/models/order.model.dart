@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class OrderModel {
   final attachment;
   final customerID;
-  final isPending;
+  final isDelivered;
   final orderID;
   final payments;
   final paymentMethod;
@@ -20,7 +20,7 @@ class OrderModel {
   OrderModel({
     required this.attachment,
     required this.customerID,
-    required this.isPending,
+    required this.isDelivered,
     required this.orderID,
     required this.payments,
     required this.paymentMethod,
@@ -38,7 +38,7 @@ class OrderModel {
     return OrderModel(
       attachment: data['attachment'],
       customerID: data['customerID'],
-      isPending: data['isPending'],
+      isDelivered: data['isDelivered'],
       orderID: data['orderID'],
       payments: data['payments'],
       paymentMethod: data['paymentMethod'],
@@ -55,7 +55,7 @@ class OrderModel {
   Map<String, dynamic> toFirestore() => {
         'attachment': attachment,
         'customerID': customerID,
-        'isPending': isPending,
+        'isDelivered': isDelivered,
         'orderID': orderID,
         'payments': payments,
         'paymentMethod': paymentMethod,

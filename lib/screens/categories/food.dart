@@ -15,6 +15,14 @@ class FoodAndBeverages extends StatefulWidget {
 class _FoodAndBeveragesState extends State<FoodAndBeverages> {
   @override
   Widget build(BuildContext context) => ListView(children: [
+        Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Text('Food and Beverages',
+                style: TextStyle(
+                    color: Colors.green.shade900,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center)),
         StreamBuilder(
             stream: productsCollection
                 .where('category', isEqualTo: 'Food and Beverages')

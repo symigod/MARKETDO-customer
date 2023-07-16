@@ -18,7 +18,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   Widget build(BuildContext context) => StreamBuilder(
       stream: ordersCollection
           .where('customerID', isEqualTo: authID)
-          .where('isPending', isEqualTo: false)
+          .where('isDelivered', isEqualTo: true)
           .orderBy('orderedOn', descending: true)
           .snapshots(),
       builder: (context, os) {

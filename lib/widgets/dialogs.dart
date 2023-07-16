@@ -102,7 +102,7 @@ viewVendorDetails(context, String vendorID) => showDialog(
                                           border: Border.all(
                                               color: vendor['isOnline']
                                                   ? Colors.green
-                                                  : Colors.red,
+                                                  : Colors.grey,
                                               width: 3)),
                                       child: Container(
                                           decoration: BoxDecoration(

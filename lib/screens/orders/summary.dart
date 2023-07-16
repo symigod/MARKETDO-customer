@@ -362,7 +362,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                               ? attachmentURL
                               : null,
                           customerID: authID,
-                          isPending: true,
+                          isDelivered: false,
                           orderID: orderID,
                           paymentMethod: _selectedPaymentMethod,
                           productIDs: widget.products

@@ -16,6 +16,14 @@ class SchoolAndOfficeSupplies extends StatefulWidget {
 class _SchoolAndOfficeSuppliesState extends State<SchoolAndOfficeSupplies> {
   @override
   Widget build(BuildContext context) => ListView(children: [
+        Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Text('School and Office Supplies',
+                style: TextStyle(
+                    color: Colors.green.shade900,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center)),
         StreamBuilder(
             stream: productsCollection
                 .where('category', isEqualTo: 'School and Office Supplies')
