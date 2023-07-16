@@ -6,6 +6,7 @@ import 'package:marketdo_app/screens/categories/household.dart';
 import 'package:marketdo_app/screens/categories/others.dart';
 import 'package:marketdo_app/screens/categories/personalcare.dart';
 import 'package:marketdo_app/screens/categories/school.office.dart';
+import 'package:marketdo_app/screens/home.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -29,7 +30,7 @@ class _ProductsScreenState extends State<ProductsScreen>
       length: 6,
       child: Scaffold(
           appBar: AppBar(
-              toolbarHeight: 0,
+              title: const SearchWidget(),
               bottom: TabBar(
                   controller: tabController,
                   isScrollable: true,

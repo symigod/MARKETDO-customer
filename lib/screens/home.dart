@@ -11,8 +11,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
-  Widget build(BuildContext context) =>
-      const Scaffold(backgroundColor: Colors.green, body: ProductsScreen());
+  Widget build(BuildContext context) => const Scaffold(body: ProductsScreen());
 
   // Widget homeWidget() => ListView(children: const [
   //       // SearchWidget(),
@@ -36,9 +35,9 @@ class _SearchWidgetState extends State<SearchWidget> {
         SizedBox(
             height: 55,
             child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                 child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(5),
                     child: TextField(
                         controller: _search,
                         onSubmitted: (value) => search(),

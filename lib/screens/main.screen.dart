@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/main.dart';
 import 'package:marketdo_app/screens/authentication/login.dart';
-import 'package:marketdo_app/screens/orders/cart.dart';
 import 'package:marketdo_app/screens/favorites.dart';
+import 'package:marketdo_app/screens/orders/cart.dart';
 import 'package:marketdo_app/screens/home.dart';
 import 'package:marketdo_app/screens/orders/main.orders.dart';
 import 'package:marketdo_app/widgets/drawer.dart';
@@ -88,10 +88,6 @@ class _MainScreenState extends State<MainScreen> {
                               subtitle: Text(
                                   '${snapshot.data!.docs[0]['name']}!',
                                   style: const TextStyle(color: Colors.white))),
-                          bottom: PreferredSize(
-                              preferredSize:
-                                  Size(MediaQuery.of(context).size.width, 60),
-                              child: const SearchWidget()),
                           actions: [
                             GestureDetector(
                                 onTap: () =>
@@ -121,7 +117,7 @@ class _MainScreenState extends State<MainScreen> {
                           elevation: 4,
                           items: [
                             const BottomNavigationBarItem(
-                                icon: Icon(Icons.home), label: 'Home'),
+                                icon: Icon(Icons.store), label: 'Products'),
                             // const BottomNavigationBarItem(
                             //     icon: Icon(Icons.category),
                             //     label: 'Categories'),
