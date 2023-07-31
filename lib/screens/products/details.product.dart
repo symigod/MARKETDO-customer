@@ -2,7 +2,6 @@ import 'package:awesome_number_picker/awesome_number_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:marketdo_app/firebase.services.dart';
@@ -57,144 +56,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           elevation: 0,
           centerTitle: true,
           title: const Text('Product Details',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          actions: [
-            IconButton(
-                onPressed: () => showDialog(
-                    barrierDismissible: false,
-                    context: context,
-                    builder: (_) => FutureBuilder(
-                        future: productsCollection
-                            .where('productID', isEqualTo: widget.productID)
-                            .get(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return errorWidget(snapshot.error.toString());
-                          }
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return loadingWidget();
-                          }
-                          if (snapshot.hasData) {
-                            var products = snapshot.data!.docs;
-                            var product = products[0];
-                            return StatefulBuilder(
-                                builder: (context, setState) {
-                              double regularPrice =
-                                  product['regularPrice'].toDouble();
-                              double finalPrice = regularPrice * kilograms;
-                              return AlertDialog(
-                                  scrollable: true,
-                                  titlePadding: EdgeInsets.zero,
-                                  title: Card(
-                                      color: Colors.green.shade800,
-                                      margin: EdgeInsets.zero,
-                                      shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(3),
-                                              topRight: Radius.circular(3))),
-                                      child: const Center(
-                                          child: Padding(
-                                              padding: EdgeInsets.all(10),
-                                              child: Text('ADD TO CART',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                  textAlign:
-                                                      TextAlign.center)))),
-                                  content: Column(children: [
-                                    Text(
-                                        'P ${numberToString(product['regularPrice'].toDouble())} per ${product['unit']}',
-                                        style: TextStyle(
-                                            color: Colors.green.shade900,
-                                            fontWeight: FontWeight.bold),
-                                        textAlign: TextAlign.center),
-                                    SizedBox(
-                                        height: 150,
-                                        child: DecimalNumberPicker(
-                                            initialValue: kilograms,
-                                            minValue: 0,
-                                            maxValue: 1000,
-                                            decimalPrecision: 2,
-                                            otherItemsDecoration: BoxDecoration(
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                      color: Colors.grey
-                                                          .withOpacity(0.5),
-                                                      blurRadius: 20,
-                                                      spreadRadius: 0)
-                                                ]),
-                                            pickedItemDecoration: BoxDecoration(
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                      color: Colors.blue
-                                                          .withOpacity(.5),
-                                                      blurRadius: 20,
-                                                      spreadRadius: 0)
-                                                ]),
-                                            onChanged: (value) => setState(
-                                                () => kilograms = value))),
-                                    const Divider(thickness: 1),
-                                    decimalToFraction(kilograms,
-                                        product['unit'].toString(), 15),
-                                    const Divider(thickness: 1),
-                                    const Text('TOTAL PAYMENT',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                        textAlign: TextAlign.center),
-                                    Text('P ${numberToString(finalPrice)}',
-                                        style: const TextStyle(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.bold),
-                                        textAlign: TextAlign.center)
-                                  ]),
-                                  actionsAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('CANCEL',
-                                            style: TextStyle(
-                                                color: Colors.red,
-                                                fontWeight: FontWeight.bold))),
-                                    ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                            backgroundColor: kilograms == 0.0
-                                                ? Colors.grey
-                                                : Colors.green.shade900),
-                                        onPressed: () async {
-                                          if (kilograms == 0.0) {
-                                            null;
-                                          } else {
-                                            final vendorIDStream =
-                                                productsCollection
-                                                    .where('productID',
-                                                        isEqualTo:
-                                                            widget.productID)
-                                                    .snapshots();
-                                            final vendorIDDocument =
-                                                await vendorIDStream.first;
-                                            final vendorID = vendorIDDocument
-                                                .docs.first['vendorID'];
-                                            addToCart(
-                                                authID,
-                                                widget.productID,
-                                                finalPrice,
-                                                kilograms,
-                                                vendorID);
-                                          }
-                                        },
-                                        child: const Text('CONFIRM',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold)))
-                                  ]);
-                            });
-                          }
-                          return emptyWidget('PRODUCT NOT FOUND');
-                        })),
-                icon: const Icon(Icons.add_shopping_cart))
-          ]),
+              style: TextStyle(fontWeight: FontWeight.bold))),
       body: SafeArea(
           child: StreamBuilder(
               stream: productsCollection
@@ -291,15 +153,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       color: Colors.red,
                                       fontWeight: FontWeight.bold))),
                           const Divider(height: 0, thickness: 1),
-                          ListTile(
-                              dense: true,
-                              leading: const Icon(Icons.delivery_dining),
-                              title: const Text('Delivery Fee'),
-                              trailing: Text(
-                                  'P ${numberToString(product.shippingCharge.toDouble())}',
-                                  style: const TextStyle(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.bold))),
+                          // ListTile(
+                          //     dense: true,
+                          //     leading: const Icon(Icons.delivery_dining),
+                          //     title: const Text('Delivery Fee'),
+                          //     trailing: Text(
+                          //         'P ${numberToString(product.shippingCharge.toDouble())}',
+                          //         style: const TextStyle(
+                          //             color: Colors.red,
+                          //             fontWeight: FontWeight.bold))),
                           const Divider(height: 0, thickness: 1),
                           FutureBuilder(
                               future: vendorsCollection
@@ -343,7 +205,137 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ]),
                       ]));
                     });
-              })));
+              })),
+      bottomSheet: ListTile(
+          tileColor: Colors.green.shade900,
+          onTap: () => showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (_) => FutureBuilder(
+                  future: productsCollection
+                      .where('productID', isEqualTo: widget.productID)
+                      .get(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return errorWidget(snapshot.error.toString());
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return loadingWidget();
+                    }
+                    if (snapshot.hasData) {
+                      var products = snapshot.data!.docs;
+                      var product = products[0];
+                      return StatefulBuilder(builder: (context, setState) {
+                        double regularPrice =
+                            product['regularPrice'].toDouble();
+                        double finalPrice = regularPrice * kilograms;
+                        return AlertDialog(
+                            scrollable: true,
+                            titlePadding: EdgeInsets.zero,
+                            title: Card(
+                                color: Colors.green.shade800,
+                                margin: EdgeInsets.zero,
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(3),
+                                        topRight: Radius.circular(3))),
+                                child: const Center(
+                                    child: Padding(
+                                        padding: EdgeInsets.all(10),
+                                        child: Text('SET QUANTITY',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold),
+                                            textAlign: TextAlign.center)))),
+                            content: Column(children: [
+                              Text(
+                                  'P ${numberToString(product['regularPrice'].toDouble())} per ${product['unit']}',
+                                  style: TextStyle(
+                                      color: Colors.green.shade900,
+                                      fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center),
+                              SizedBox(
+                                  height: 150,
+                                  child: DecimalNumberPicker(
+                                      initialValue: kilograms,
+                                      minValue: 0,
+                                      maxValue: 1000,
+                                      decimalPrecision: 2,
+                                      otherItemsDecoration:
+                                          BoxDecoration(boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            blurRadius: 20,
+                                            spreadRadius: 0)
+                                      ]),
+                                      pickedItemDecoration:
+                                          BoxDecoration(boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.blue.withOpacity(.5),
+                                            blurRadius: 20,
+                                            spreadRadius: 0)
+                                      ]),
+                                      onChanged: (value) =>
+                                          setState(() => kilograms = value))),
+                              const Divider(thickness: 1),
+                              decimalToFraction(
+                                  kilograms, product['unit'].toString(), 15),
+                              const Divider(thickness: 1),
+                              const Text('TOTAL PAYMENT',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center),
+                              Text('P ${numberToString(finalPrice)}',
+                                  style: const TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center)
+                            ]),
+                            actionsAlignment: MainAxisAlignment.spaceBetween,
+                            actions: [
+                              TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('CANCEL',
+                                      style: TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold))),
+                              ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: kilograms == 0.0
+                                          ? Colors.grey
+                                          : Colors.green.shade900),
+                                  onPressed: () async {
+                                    if (kilograms == 0.0) {
+                                      null;
+                                    } else {
+                                      final vendorIDStream = productsCollection
+                                          .where('productID',
+                                              isEqualTo: widget.productID)
+                                          .snapshots();
+                                      final vendorIDDocument =
+                                          await vendorIDStream.first;
+                                      final vendorID = vendorIDDocument
+                                          .docs.first['vendorID'];
+                                      addToCart(authID, widget.productID,
+                                          finalPrice, kilograms, vendorID);
+                                    }
+                                  },
+                                  child: const Text('CONFIRM',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)))
+                            ]);
+                      });
+                    }
+                    return emptyWidget('PRODUCT NOT FOUND');
+                  })),
+          title:
+              const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(Icons.add_shopping_cart, color: Colors.white),
+            SizedBox(width: 10),
+            Text('ADD TO CART',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center)
+          ])));
 
   addToCart(String? customerID, String productID, double payment,
       double unitsBought, String vendorID) async {
@@ -394,20 +386,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         for (var cart in querySnapshot.docs) {
           late List<dynamic> productIDs;
           late List<dynamic> payments;
-          late List<dynamic> unitsBought0;
+          late List<dynamic> unitsBought;
           Map<String, dynamic>? cartData = cart.data() as Map<String, dynamic>?;
           if (cartData != null && cartData.containsKey('productIDs')) {
             productIDs = cartData['productIDs'] as List<dynamic>;
             payments = cartData['payments'] as List<dynamic>;
-            unitsBought0 = cartData['unitsBought'] as List<dynamic>;
+            unitsBought = cartData['unitsBought'] as List<dynamic>;
             productIDs.add(productID);
             payments.add(payment);
-            unitsBought0.add(unitsBought);
+            unitsBought.add(unitsBought);
           }
           cartsCollection.doc(cart.id).update({
             'productIDs': productIDs,
             'payments': payments,
-            'unitsBought': unitsBought0,
+            'unitsBought': unitsBought,
           }).then((value) => showDialog(
                   context: context,
                   builder: (_) =>

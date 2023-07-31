@@ -180,7 +180,8 @@ class _MainScreenState extends State<MainScreen> {
                                       stream: ordersCollection
                                           .where('customerID',
                                               isEqualTo: authID)
-                                          .where('isPending', isEqualTo: true)
+                                          .where('isDelivered',
+                                              isEqualTo: false)
                                           .snapshots(),
                                       builder: (context, snapshot) {
                                         if (snapshot.hasError) {

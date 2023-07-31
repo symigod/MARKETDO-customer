@@ -239,3 +239,5 @@ FaIcon categoryIcon(category) {
   }
   return FaIcon(category);
 }
+
+// String paymentMethod(String paymentMethod) => 

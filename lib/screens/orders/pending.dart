@@ -18,7 +18,7 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
   Widget build(BuildContext context) => StreamBuilder(
       stream: ordersCollection
           .where('customerID', isEqualTo: authID)
-          .where('isPending', isEqualTo: false)
+          .where('isDelivered', isEqualTo: false)
           .orderBy('orderedOn', descending: true)
           .snapshots(),
       builder: (context, os) {
@@ -173,7 +173,7 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                                                           width: 2)),
                                                   child: ClipRRect(borderRadius: BorderRadius.circular(50), child: CachedNetworkImage(imageUrl: vendor['logo'], fit: BoxFit.cover)))),
                                           title: Text(vendor['businessName'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                          trailing: InkWell(onTap: () => Navigator.pop(context), child: const Icon(Icons.close, color: Colors.white))));
+                                          trailing: InkWell(onTap: () => Navigator.pop(context), child: const Padding(padding: EdgeInsets.all(10), child: Icon(Icons.close, color: Colors.white)))));
                                 }
                                 return emptyWidget('VENDOR NOT FOUND');
                               }),
@@ -183,19 +183,22 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                               child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    SizedBox(
-                                        height: 64,
-                                        child: ListTile(
-                                            leading:
-                                                const Icon(Icons.date_range),
-                                            title: const Text('Ordered on:'),
-                                            trailing: Text(
-                                                dateTimeToString(
-                                                    order['orderedOn']),
-                                                style: const TextStyle(
-                                                    color: Colors.blue,
-                                                    fontWeight:
-                                                        FontWeight.bold)))),
+                                    ListTile(
+                                        leading: const Icon(
+                                            Icons.confirmation_number),
+                                        title: const Text('Order Code:'),
+                                        trailing: Text(order['orderID'],
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold))),
+                                    ListTile(
+                                        leading: const Icon(Icons.date_range),
+                                        title: const Text('Ordered on:'),
+                                        trailing: Text(
+                                            dateTimeToString(
+                                                order['orderedOn']),
+                                            style: const TextStyle(
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.bold))),
                                     StreamBuilder(
                                         stream: Stream.fromFuture(Future.wait(
                                             products.map((productId) =>
@@ -291,17 +294,23 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                                                     })
                                               ]);
                                         }),
-                                    SizedBox(
-                                        height: 64,
-                                        child: ListTile(
-                                            leading: const Icon(Icons.payments),
-                                            title: const Text('Total Payment:'),
-                                            trailing: Text(
-                                                'P ${numberToString(order['totalPayment'].toDouble())}',
-                                                style: const TextStyle(
-                                                    color: Colors.red,
-                                                    fontWeight:
-                                                        FontWeight.bold))))
+                                    ListTile(
+                                        leading: const Icon(
+                                            Icons.account_balance_wallet),
+                                        title: const Text('Payment Method:'),
+                                        trailing: Text(
+                                            '${order['paymentMethod']}',
+                                            style: const TextStyle(
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold))),
+                                    ListTile(
+                                        leading: const Icon(Icons.payments),
+                                        title: const Text('Total Payment:'),
+                                        trailing: Text(
+                                            'P ${numberToString(order['totalPayment'].toDouble())}',
+                                            style: const TextStyle(
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold)))
                                   ])));
                     }
                     return emptyWidget('ORDER NOT FOUND');

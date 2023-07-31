@@ -120,8 +120,8 @@ class _CartScreenState extends State<CartScreen> {
                                           cart['unitsBought'][pIndex];
                                       totalPayment = paymentsList.reduce(
                                           (sum, payment) => sum + payment);
-                                      shippingCharge =
-                                          product['shippingCharge'];
+                                      // shippingCharge =
+                                      //     product['shippingCharge'];
                                       return ListTile(
                                           dense: true,
                                           isThreeLine: true,

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/models/order.model.dart';
 import 'package:marketdo_app/models/vendor.model.dart';
+import 'package:marketdo_app/screens/main.screen.dart';
 import 'package:marketdo_app/screens/products/details.product.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
 import 'package:marketdo_app/widgets/snapshots.dart';
@@ -66,7 +67,10 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: const Text('Order Summary')),
+      appBar: AppBar(
+          centerTitle: true,
+          title: const Text('Order Summary',
+              style: TextStyle(fontWeight: FontWeight.bold))),
       body: SingleChildScrollView(
           child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -251,7 +255,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                           fontWeight: FontWeight.bold)))
                             ]),
                             cardWidget(context, 'TOTAL PAYMENT', [
-                              _selectedShippingMethod == 'PICKUP'
+                              /* _selectedShippingMethod == 'PICKUP'
                                   ? ListTile(
                                       title: Text(
                                           'P ${totalPayment().toStringAsFixed(2)}',
@@ -259,28 +263,28 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                               color: Colors.red,
                                               fontWeight: FontWeight.bold),
                                           textAlign: TextAlign.center))
-                                  : ListTile(
-                                      title: DropdownButtonFormField<String>(
-                                          isDense: true,
-                                          decoration: const InputDecoration(
-                                              border: OutlineInputBorder()),
-                                          value: _selectedPaymentMethod,
-                                          onChanged: (value) => setState(() =>
-                                              _selectedPaymentMethod = value!),
-                                          items: const [
-                                            DropdownMenuItem(
-                                                value: 'COD',
-                                                child:
-                                                    Text('Cash on Delivery')),
-                                            DropdownMenuItem(
-                                                value: 'GCASH',
-                                                child: Text('Gcash'))
-                                          ]),
-                                      trailing: Text(
-                                          'P ${totalPayment().toStringAsFixed(2)}',
-                                          style: const TextStyle(
-                                              color: Colors.red,
-                                              fontWeight: FontWeight.bold))),
+                                  : */
+                              ListTile(
+                                  title: DropdownButtonFormField<String>(
+                                      isDense: true,
+                                      decoration: const InputDecoration(
+                                          border: OutlineInputBorder()),
+                                      value: _selectedPaymentMethod,
+                                      onChanged: (value) => setState(() =>
+                                          _selectedPaymentMethod = value!),
+                                      items: const [
+                                        DropdownMenuItem(
+                                            value: 'COD',
+                                            child: Text('Cash on Delivery')),
+                                        DropdownMenuItem(
+                                            value: 'GCASH',
+                                            child: Text('Gcash'))
+                                      ]),
+                                  trailing: Text(
+                                      'P ${totalPayment().toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold))),
                               if (_selectedPaymentMethod == 'GCASH')
                                 attachment == null
                                     ? ElevatedButton(
@@ -326,11 +330,15 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
           onTap: () =>
               placeOrder(totalPayment(), widget.vendorID, widget.cartID),
           tileColor: Colors.green.shade900,
-          leading: const Icon(Icons.shopping_bag, color: Colors.white),
-          title: const Text('Check out',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          trailing: const Icon(Icons.check, color: Colors.white)));
+          title:
+              const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(Icons.shopping_cart_checkout, color: Colors.white),
+            SizedBox(width: 10),
+            Text('CHECK OUT',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center)
+          ])));
 
   placeOrder(double totalPayment, String vendorID, String cartID) async =>
       _selectedPaymentMethod == 'GCASH' && attachment == null
@@ -388,7 +396,8 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                               context: context,
                               builder: (builder) =>
                                   successDialog(context, 'Order successful!')))
-                          .then((value) => Navigator.pop(context));
+                          .then((value) => Navigator.pushNamedAndRemoveUntil(
+                              context, MainScreen.id, (route) => false));
                     } catch (e) {
                       EasyLoading.dismiss();
                       showDialog(

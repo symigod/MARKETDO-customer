@@ -173,7 +173,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                                   imageUrl: vendor['logo'],
                                                   fit: BoxFit.cover)))),
                                   title: Text(vendor['businessName'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                  trailing: InkWell(onTap: () => Navigator.pop(context), child: const Icon(Icons.close, color: Colors.white))));
+                                  trailing: InkWell(onTap: () => Navigator.pop(context), child: const Padding(padding: EdgeInsets.all(10), child: Icon(Icons.close, color: Colors.white)))));
                         }
                         return emptyWidget('VENDOR NOT FOUND');
                       }),

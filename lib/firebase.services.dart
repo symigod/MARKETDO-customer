@@ -18,7 +18,7 @@ final productsCollection = FirebaseFirestore.instance.collection('products');
 final vendorsCollection = FirebaseFirestore.instance.collection('vendors');
 
 class FirebaseService {
-  static var instance;
+  // static var instance;
   Future<String> uploadImage(XFile? file, String? reference) async {
     File file0 = File(file!.path);
     firebase_storage.Reference ref =

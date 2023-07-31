@@ -31,7 +31,7 @@ dependencies:
   get: ^4.6.5
   get_storage: ^2.1.1
   getwidget: ^3.0.1
-  google_maps_flutter: ^2.2.5
+  google_maps_flutter: ^2.3.1
   image_picker: ^0.8.7+4
   intl: ^0.18.0
   location: ^4.4.0

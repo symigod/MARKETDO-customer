@@ -6,12 +6,13 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/screens/authentication/login.dart';
+import 'package:marketdo_app/screens/googlemaps/map.dart';
 import 'package:marketdo_app/screens/main.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/screens/authentication/onboarding.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-String appVersion = 'Jul 15, 2024';
+String appVersion = 'Jul 17, 2024';
 
 int marketDoGreen = 0xFF1B5E20;
 MaterialColor _marketDoGreen = MaterialColor(marketDoGreen, {
@@ -104,7 +105,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) => MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(primarySwatch: _marketDoGreen, fontFamily: 'Lato'),
-          home: const SplashScreen(),
+          home: const GoogleMaps(),
           builder: EasyLoading.init(),
           routes: {
             OnBoardingScreen.id: (context) => const OnBoardingScreen(),

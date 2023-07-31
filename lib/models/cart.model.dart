@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class CartModel {
   final cartID;
   final customerID;
+
   final payments;
   final productIDs;
   final unitsBought;

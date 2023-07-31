@@ -2,14 +2,11 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/main.dart';
 import 'package:marketdo_app/screens/authentication/landing.dart';
-import 'package:marketdo_app/widgets/dialogs.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+import 'package:marketdo_app/screens/googlemaps/geolocationmaps.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -21,10 +18,6 @@ class RegistrationScreen extends StatefulWidget {
 const List<String> list = <String>['Yes', 'No'];
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  String googleMapsURL = '';
-  late String latitude = '';
-  late String longitude = '';
-
   final FirebaseService _services = FirebaseService();
   final _formKey = GlobalKey<FormState>();
   final _customerName = TextEditingController();
@@ -221,23 +214,32 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       validator: (value) =>
                           value!.isEmpty ? 'Enter a Landmark' : null),
                   ElevatedButton(
-                      onPressed: () => getCurrentLocation().then((value) {
-                            latitude = value.latitude.toString();
-                            longitude = value.longitude.toString();
+                      onPressed: () =>
+                          GeoLocationMaps().getCurrentLocation().then((value) {
+                            GeoLocationMaps.latitude =
+                                value.latitude.toString();
+                            GeoLocationMaps.longitude =
+                                value.longitude.toString();
                             setState(() {
-                              googleMapsURL =
-                                  'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
-                              _googleMapsURL.text = googleMapsURL;
+                              GeoLocationMaps.googleMapsURL =
+                                  'https://www.google.com/maps/search/?api=1&query=${GeoLocationMaps.latitude},${GeoLocationMaps.longitude}';
+                              _googleMapsURL.text =
+                                  GeoLocationMaps.googleMapsURL;
                             });
-                            liveLocation();
+                            GeoLocationMaps().liveLocation();
                           }),
                       child: const Text('Set my location')),
-                  if (googleMapsURL.isNotEmpty)
+                  if (GeoLocationMaps.googleMapsURL.isNotEmpty)
                     _formField(
                         label: 'Google Maps URL', controller: _googleMapsURL),
-                  if (latitude.isNotEmpty && longitude.isNotEmpty)
+                  if (GeoLocationMaps.latitude.isNotEmpty &&
+                      GeoLocationMaps.longitude.isNotEmpty)
                     ElevatedButton(
-                        onPressed: () => openGoogleMaps(latitude, longitude),
+                        onPressed: () => GeoLocationMaps().openGoogleMaps(
+                            context,
+                            GeoLocationMaps.latitude,
+                            GeoLocationMaps.longitude,
+                            setState),
                         child: const Text('Check on Google Maps'))
                 ]))
           ])),
@@ -263,52 +265,4 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       onPressed: _saveToDB, child: const Text('Register')))
             ])
           ]));
-
-  Future<Position> getCurrentLocation() async {
-    EasyLoading.show();
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error(
-          'Location service is disabled. Please enable location service.');
-    }
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permission denied.');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permission permanently denied. Please enable location service.');
-    }
-    EasyLoading.dismiss();
-    return await Geolocator.getCurrentPosition();
-  }
-
-  void liveLocation() {
-    LocationSettings locationSettings = const LocationSettings(
-        accuracy: LocationAccuracy.high, distanceFilter: 100);
-    Geolocator.getPositionStream(locationSettings: locationSettings)
-        .listen((position) {
-      latitude = position.latitude.toString();
-      longitude = position.longitude.toString();
-    });
-  }
-
-  Future<void> openGoogleMaps(String latitude, longitude) async => showDialog(
-      context: context,
-      builder: (_) => confirmDialog(context, 'CHECK ON GOOGLE MAPS',
-              'If the location is correct, tap on "Share" to copy your location and paste it in "Google Maps URL" field.',
-              () async {
-            setState(() => googleMapsURL =
-                'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
-            await canLaunchUrl(Uri.parse(googleMapsURL))
-                ? await launchUrlString(googleMapsURL)
-                : showDialog(
-                    context: context,
-                    builder: (_) =>
-                        errorDialog(context, 'Invalid Google Maps URL!'));
-          }));
 }

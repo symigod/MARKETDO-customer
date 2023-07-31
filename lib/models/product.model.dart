@@ -11,7 +11,7 @@ class ProductModel {
   final productID;
   final productName;
   final regularPrice;
-  final shippingCharge;
+
   final stockOnHand;
   final subcategory;
   final unit;
@@ -26,7 +26,6 @@ class ProductModel {
     required this.productID,
     required this.productName,
     required this.regularPrice,
-    required this.shippingCharge,
     required this.stockOnHand,
     required this.subcategory,
     required this.unit,
@@ -44,7 +43,6 @@ class ProductModel {
       productID: data['productID'],
       productName: data['productName'] ?? '',
       regularPrice: data['regularPrice'] ?? 0.0,
-      shippingCharge: data['shippingCharge'] ?? 0.0,
       stockOnHand: data['stockOnHand'] ?? 0.0,
       subcategory: data['subcategory'] ?? '',
       unit: data['unit'] ?? '',
@@ -61,7 +59,6 @@ class ProductModel {
         'productID': productID,
         'productName': productName,
         'regularPrice': regularPrice,
-        'shippingCharge': shippingCharge,
         'stockOnHand': stockOnHand,
         'subcategory': subcategory,
         'unit': unit,
