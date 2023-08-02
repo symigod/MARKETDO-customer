@@ -107,7 +107,6 @@ class _CartScreenState extends State<CartScreen> {
                                 if (ps.hasData) {
                                   List products = ps.data!;
                                   double totalPayment = 0;
-                                  double shippingCharge = 0;
                                   return Column(children: [
                                     Column(
                                         children: products.map((product) {
@@ -120,8 +119,6 @@ class _CartScreenState extends State<CartScreen> {
                                           cart['unitsBought'][pIndex];
                                       totalPayment = paymentsList.reduce(
                                           (sum, payment) => sum + payment);
-                                      // shippingCharge =
-                                      //     product['shippingCharge'];
                                       return ListTile(
                                           dense: true,
                                           isThreeLine: true,
@@ -164,7 +161,7 @@ class _CartScreenState extends State<CartScreen> {
                                                         '${product['description']}\n'),
                                                 TextSpan(
                                                     text:
-                                                        'P ${payments.toStringAsFixed(2)}',
+                                                        'P ${numberToString(payments)}',
                                                     style: const TextStyle(
                                                         color: Colors.red,
                                                         fontWeight:
@@ -185,7 +182,7 @@ class _CartScreenState extends State<CartScreen> {
                                         thickness: 1),
                                     ListTile(
                                         title: Text(
-                                            'TOTAL: P ${totalPayment.toStringAsFixed(2)}',
+                                            'TOTAL: P ${numberToString(totalPayment)}',
                                             style: const TextStyle(
                                                 color: Colors.red,
                                                 fontWeight: FontWeight.bold)),
@@ -202,8 +199,6 @@ class _CartScreenState extends State<CartScreen> {
                                                           products: products,
                                                           partialPrice:
                                                               totalPayment,
-                                                          shippingCharge:
-                                                              shippingCharge,
                                                           unitsBought: cart[
                                                               'unitsBought'],
                                                         ))),
@@ -275,10 +270,19 @@ class _CartScreenState extends State<CartScreen> {
                             await cartsCollection.doc(cartID).get();
                         List<dynamic> productIDs =
                             List<dynamic>.from(cartSnapshot['productIDs']);
+                        List<dynamic> payments =
+                            List<dynamic>.from(cartSnapshot['payments']);
+                        List<dynamic> unitsBought =
+                            List<dynamic>.from(cartSnapshot['unitsBought']);
                         if (index >= 0 && index < productIDs.length) {
                           productIDs.removeAt(index);
-                          await cartsCollection.doc(cartID).update(
-                              {'productIDs': productIDs}).then((value) async {
+                          payments.removeAt(index);
+                          unitsBought.removeAt(index);
+                          await cartsCollection.doc(cartID).update({
+                            'productIDs': productIDs,
+                            'payments': payments,
+                            'unitsBought': unitsBought
+                          }).then((value) async {
                             if (productIDs.isEmpty) {
                               await cartsCollection.doc(cartID).delete().then(
                                   (value) => showDialog(

@@ -24,8 +24,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
   void _getCurrentLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+          desiredAccuracy: LocationAccuracy.high);
       setState(() {
         latitude = position.latitude;
         longitude = position.longitude;
@@ -33,9 +32,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
       });
     } catch (e) {
       print('Error: $e');
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
 
@@ -46,22 +43,15 @@ class _GoogleMapsState extends State<GoogleMaps> {
         : null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Google Maps')),
-      body: Stack(
-        children: [
+        appBar: AppBar(title: const Text('Google Maps')),
+        body: Stack(children: [
           if (currentLatLng != null)
             GoogleMap(
-              initialCameraPosition:
-                  CameraPosition(target: currentLatLng, zoom: 10),
-              onMapCreated: _createMap,
-            ),
-          if (isLoading)
-            Center(
-              child: CircularProgressIndicator(),
-            ),
-        ],
-      ),
-    );
+                initialCameraPosition:
+                    CameraPosition(target: currentLatLng, zoom: 10),
+                onMapCreated: _createMap),
+          if (isLoading) const Center(child: CircularProgressIndicator())
+        ]));
   }
 
   void _createMap(GoogleMapController gmController) {

@@ -10,8 +10,8 @@ class OrderModel {
   final payments;
   final paymentMethod;
   final productIDs;
-  final shippingFee;
-  final shippingMethod;
+  final deliveryFee;
+  final deliveryMethod;
   final orderedOn;
   final totalPayment;
   final unitsBought;
@@ -25,8 +25,8 @@ class OrderModel {
     required this.payments,
     required this.paymentMethod,
     required this.productIDs,
-    required this.shippingFee,
-    required this.shippingMethod,
+    required this.deliveryFee,
+    required this.deliveryMethod,
     required this.orderedOn,
     required this.totalPayment,
     required this.unitsBought,
@@ -43,8 +43,8 @@ class OrderModel {
       payments: data['payments'],
       paymentMethod: data['paymentMethod'],
       productIDs: data['productIDs'],
-      shippingFee: data['shippingFee'],
-      shippingMethod: data['shippingMethod'],
+      deliveryFee: data['deliveryFee'],
+      deliveryMethod: data['deliveryMethod'],
       orderedOn: data['orderedOn'],
       totalPayment: data['totalPayment'],
       unitsBought: data['unitsBought'],
@@ -60,8 +60,8 @@ class OrderModel {
         'payments': payments,
         'paymentMethod': paymentMethod,
         'productIDs': productIDs,
-        'shippingFee': shippingFee,
-        'shippingMethod': shippingMethod,
+        'deliveryFee': deliveryFee,
+        'deliveryMethod': deliveryMethod,
         'orderedOn': orderedOn,
         'totalPayment': totalPayment,
         'unitsBought': unitsBought,

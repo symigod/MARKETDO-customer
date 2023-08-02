@@ -171,7 +171,9 @@ Future<void> openURL(context, String url) async {
 String dateTimeToString(Timestamp timestamp) =>
     DateFormat('MMM dd, yyyy').format(timestamp.toDate()).toString();
 
-String numberToString(double number) => NumberFormat('#,###.00').format(number);
+String numberToString(double number) => number < 1
+    ? NumberFormat('0.00').format(number)
+    : NumberFormat('#,###.00').format(number);
 
 Text decimalToFraction(double value, String unit, double fontSize) {
   const int maxDenominator = 1000000;

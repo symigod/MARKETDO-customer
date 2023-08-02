@@ -377,25 +377,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   addToCartWithSameVendor(String? customerID, String productID, double payment,
-      double unitsBought, String vendorID) async {
+      double unit, String vendorID) async {
     try {
       cartsCollection
           .where('vendorID', isEqualTo: vendorID)
           .get()
           .then((QuerySnapshot querySnapshot) {
         for (var cart in querySnapshot.docs) {
-          late List<dynamic> productIDs;
-          late List<dynamic> payments;
-          late List<dynamic> unitsBought;
+          List<dynamic> productIDs = [];
+          List<dynamic> payments = [];
+          List<dynamic> unitsBought = [];
           Map<String, dynamic>? cartData = cart.data() as Map<String, dynamic>?;
           if (cartData != null && cartData.containsKey('productIDs')) {
             productIDs = cartData['productIDs'] as List<dynamic>;
             payments = cartData['payments'] as List<dynamic>;
             unitsBought = cartData['unitsBought'] as List<dynamic>;
-            productIDs.add(productID);
-            payments.add(payment);
-            unitsBought.add(unitsBought);
           }
+          productIDs.add(productID);
+          payments.add(payment);
+          unitsBought.add(unit);
+
           cartsCollection.doc(cart.id).update({
             'productIDs': productIDs,
             'payments': payments,

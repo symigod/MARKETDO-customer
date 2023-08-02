@@ -19,7 +19,6 @@ class OrderSummaryScreen extends StatefulWidget {
   final List products;
   final List unitsBought;
   final double partialPrice;
-  final double shippingCharge;
 
   const OrderSummaryScreen(
       {Key? key,
@@ -28,7 +27,6 @@ class OrderSummaryScreen extends StatefulWidget {
       required this.payments,
       required this.products,
       required this.partialPrice,
-      required this.shippingCharge,
       required this.unitsBought})
       : super(key: key);
 
@@ -39,14 +37,15 @@ class OrderSummaryScreen extends StatefulWidget {
 class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
   String _selectedPaymentMethod = 'COD';
   String _selectedShippingMethod = 'DELIVERY';
+  double deliveryFee = 0;
   Stream getVendor(String vendorID) => vendorsCollection
       .where('vendorID', isEqualTo: vendorID)
       .snapshots()
       .map((vendor) =>
           vendor.docs.map((doc) => VendorModel.fromFirestore(doc)).toList());
-  double setShippingCharge() =>
-      _selectedShippingMethod == 'PICKUP' ? 0 : widget.shippingCharge;
-  double totalPayment() => widget.partialPrice + setShippingCharge();
+  double setDeliveryFee() =>
+      _selectedShippingMethod == 'PICKUP' ? 0 : deliveryFee;
+  double totalPayment() => widget.partialPrice + setDeliveryFee();
 
   final ImagePicker _picker = ImagePicker();
   XFile? attachment;
@@ -63,6 +62,12 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
             onPressed: () {
               ScaffoldMessenger.of(context).clearSnackBars();
             })));
+  }
+
+  @override
+  void initState() {
+    setState(() => deliveryFee = widget.partialPrice * 0.01);
+    super.initState();
   }
 
   @override
@@ -212,8 +217,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                             fontWeight: FontWeight.bold)),
                                     subtitle: Text(
                                         '$unitsBought ${product['unit']}/s'),
-                                    trailing: Text(
-                                        payments.toDouble().toStringAsFixed(2),
+                                    trailing: Text(numberToString(payments),
                                         style: const TextStyle(
                                             color: Colors.red,
                                             fontWeight: FontWeight.bold)));
@@ -226,7 +230,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold)),
                                   trailing: Text(
-                                      'P ${widget.partialPrice.toStringAsFixed(2)}',
+                                      'P ${numberToString(widget.partialPrice)}',
                                       style: const TextStyle(
                                           color: Colors.red,
                                           fontWeight: FontWeight.bold)))
@@ -249,7 +253,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                             child: Text('Pick-Up'))
                                       ]),
                                   trailing: Text(
-                                      'P ${setShippingCharge().toStringAsFixed(2)}',
+                                      'P ${numberToString(setDeliveryFee())}',
                                       style: const TextStyle(
                                           color: Colors.red,
                                           fontWeight: FontWeight.bold)))
@@ -281,7 +285,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                             child: Text('Gcash'))
                                       ]),
                                   trailing: Text(
-                                      'P ${totalPayment().toStringAsFixed(2)}',
+                                      'P ${numberToString(totalPayment())}',
                                       style: const TextStyle(
                                           color: Colors.red,
                                           fontWeight: FontWeight.bold))),
@@ -376,8 +380,8 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                           productIDs: widget.products
                               .map((product) => product['productID'])
                               .toList(),
-                          shippingFee: setShippingCharge(),
-                          shippingMethod: _selectedShippingMethod,
+                          deliveryFee: setDeliveryFee(),
+                          deliveryMethod: _selectedShippingMethod,
                           orderedOn: DateTime.now(),
                           totalPayment: totalPayment,
                           vendorID: vendorID,

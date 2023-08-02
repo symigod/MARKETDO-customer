@@ -6,9 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class GeoLocationMaps {
-  static late String googleMapsURL = '';
-  static late String latitude = '';
-  static late String longitude = '';
+  static String googleMapsURL = '';
+  static String latitude = '';
+  static String longitude = '';
   Future<Position> getCurrentLocation() async {
     EasyLoading.show();
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();

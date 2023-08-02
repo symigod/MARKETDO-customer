@@ -295,6 +295,15 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                                               ]);
                                         }),
                                     ListTile(
+                                        leading:
+                                            const Icon(Icons.delivery_dining),
+                                        title: const Text('Delivery Fee:'),
+                                        trailing: Text(
+                                            'P ${numberToString(order['deliveryFee'].toDouble())}',
+                                            style: const TextStyle(
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold))),
+                                    ListTile(
                                         leading: const Icon(
                                             Icons.account_balance_wallet),
                                         title: const Text('Payment Method:'),
