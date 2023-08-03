@@ -187,7 +187,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                         leading: const Icon(
                                             Icons.confirmation_number),
                                         title: const Text('Order Code:'),
-                                        trailing: Text(order['orderID'],
+                                        subtitle: Text(order['orderID'],
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.bold))),
                                     ListTile(
@@ -251,6 +251,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                                           order['unitsBought']
                                                               [pIndex];
                                                       return ListTile(
+                                                        dense:true,
                                                           leading: SizedBox(
                                                               width: 50,
                                                               child: CachedNetworkImage(
@@ -281,8 +282,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                                                         fontWeight:
                                                                             FontWeight.bold))
                                                               ])),
-                                                          subtitle: Text(product
-                                                              .description),
                                                           trailing: Text(
                                                               'P ${numberToString(payments)}',
                                                               style: const TextStyle(
@@ -297,29 +296,44 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                     ListTile(
                                         leading:
                                             const Icon(Icons.delivery_dining),
-                                        title: const Text('Delivery Fee:'),
+                                        title: const Text('Delivery:'),
+                                        subtitle: Text(
+                                            order['deliveryMethod'] ==
+                                                    'DELIVERY'
+                                                ? 'Home Delivery'
+                                                : 'Pick-up'),
                                         trailing: Text(
                                             'P ${numberToString(order['deliveryFee'].toDouble())}',
                                             style: const TextStyle(
                                                 color: Colors.red,
                                                 fontWeight: FontWeight.bold))),
                                     ListTile(
-                                        leading: const Icon(
-                                            Icons.account_balance_wallet),
-                                        title: const Text('Payment Method:'),
-                                        trailing: Text(
-                                            '${order['paymentMethod']}',
-                                            style: const TextStyle(
-                                                color: Colors.red,
-                                                fontWeight: FontWeight.bold))),
-                                    ListTile(
-                                        leading: const Icon(Icons.payments),
-                                        title: const Text('Total Payment:'),
-                                        trailing: Text(
-                                            'P ${numberToString(order['totalPayment'].toDouble())}',
-                                            style: const TextStyle(
-                                                color: Colors.red,
-                                                fontWeight: FontWeight.bold)))
+                              onTap: () => order['paymentMethod'] == 'GCASH'
+                                  ? showDialog(
+                                      context: context,
+                                      builder: (_) => Center(
+                                          child: SingleChildScrollView(
+                                              child: AlertDialog(
+                                                  titlePadding: EdgeInsets.zero,
+                                                  title: Card(
+                                                      color: Colors.green,
+                                                      margin: EdgeInsets.zero,
+                                                      shape: const RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.only(
+                                                              topLeft: Radius.circular(
+                                                                  3),
+                                                              topRight: Radius.circular(
+                                                                  3))),
+                                                      child: ListTile(
+                                                          title: const Text('GCASH Attachment',
+                                                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                                          trailing: InkWell(onTap: () => Navigator.pop(context), child: const Padding(padding: EdgeInsets.all(10), child: Icon(Icons.close, color: Colors.white))))),
+                                                  content: CachedNetworkImage(imageUrl: order['attachment'])))))
+                                  : null,
+                              leading: const Icon(Icons.payments),
+                              title: const Text('Payment:'),
+                              subtitle: Text('${order['paymentMethod'] == 'COD' ? 'Cash on Delivery' : order['paymentMethod']}'),
+                              trailing: Text('P ${numberToString(order['totalPayment'].toDouble())}', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)))
                                   ])));
                     }
                     return emptyWidget('ORDER NOT FOUND');

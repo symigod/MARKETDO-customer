@@ -49,7 +49,6 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
 
   final ImagePicker _picker = ImagePicker();
   XFile? attachment;
-  String? attachmentURL;
   Future<XFile?> _pickImage() async =>
       await _picker.pickImage(source: ImageSource.gallery);
 
@@ -97,7 +96,10 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                           children: [
                             cardWidget(context, 'VENDOR', [
                               StreamBuilder(
-                                  stream: getVendor(widget.vendorID),
+                                  stream: vendorsCollection
+                                      .where('vendorID',
+                                          isEqualTo: widget.vendorID)
+                                      .snapshots(),
                                   builder: (context, vs) {
                                     if (vs.hasError) {
                                       return errorWidget(vs.error.toString());
@@ -106,86 +108,27 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                         ConnectionState.waiting) {
                                       return loadingWidget();
                                     }
-                                    if (vs.data!.isNotEmpty) {
-                                      var vendor = vs.data![0];
-                                      return Column(children: [
-                                        ListTile(
-                                            dense: true,
-                                            leading: const SizedBox(
-                                                height: 50,
-                                                width: 50,
-                                                child: Center(
-                                                    child: Icon(Icons.store))),
-                                            title: Text(vendor.businessName),
-                                            subtitle: Text(vendor.vendorID)),
-                                        ListTile(
-                                            dense: true,
-                                            leading: const SizedBox(
-                                                height: 50,
-                                                width: 50,
-                                                child: Center(
-                                                    child: Icon(
-                                                        Icons.location_on))),
-                                            title: Text(vendor.address),
-                                            subtitle: Text(vendor.landMark)),
-                                        ListTile(
-                                            onTap: () => showDialog(
-                                                context: context,
-                                                builder: (_) => AlertDialog(
-                                                    scrollable: true,
-                                                    title: const Text(
-                                                        'VENDOR CONTACT'),
-                                                    contentPadding:
-                                                        EdgeInsets.zero,
-                                                    content: Column(children: [
-                                                      const SizedBox(
-                                                          height: 20),
-                                                      ListTile(
-                                                          onTap: () => openURL(
-                                                              context,
-                                                              'tel:${vendor.mobile}'),
-                                                          dense: true,
-                                                          leading: const Icon(
-                                                              Icons.call),
-                                                          title: Text(
-                                                              vendor.mobile),
-                                                          trailing: IconButton(
-                                                              onPressed: () =>
-                                                                  copyToClipboard(
-                                                                      context,
-                                                                      vendor
-                                                                          .mobile),
-                                                              icon: const Icon(
-                                                                  Icons.copy))),
-                                                      ListTile(
-                                                          onTap: () => openURL(
-                                                              context,
-                                                              'mailto:${vendor.email}'),
-                                                          dense: true,
-                                                          leading: const Icon(
-                                                              Icons.email),
-                                                          title: Text(
-                                                              vendor.email),
-                                                          trailing: IconButton(
-                                                              onPressed: () =>
-                                                                  copyToClipboard(
-                                                                      context,
-                                                                      vendor
-                                                                          .email),
-                                                              icon: const Icon(
-                                                                  Icons.copy))),
-                                                      const SizedBox(height: 20)
-                                                    ]))),
-                                            dense: true,
-                                            leading: const SizedBox(
-                                                height: 50,
-                                                width: 50,
-                                                child: Center(
-                                                    child: Icon(
-                                                        Icons.perm_phone_msg))),
-                                            title: Text(vendor.mobile),
-                                            subtitle: Text(vendor.email))
-                                      ]);
+                                    if (vs.hasData) {
+                                      return ListTile(
+                                          dense: true,
+                                          leading: SizedBox(
+                                              height: 35,
+                                              width: 35,
+                                              child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(50),
+                                                  child: Image.network(vs
+                                                      .data!.docs[0]['logo']))),
+                                          title: Text(
+                                              vs.data!.docs[0]['businessName']),
+                                          trailing: TextButton(
+                                              onPressed: () =>
+                                                  viewVendorDetails(
+                                                      context,
+                                                      vs.data!.docs[0]
+                                                          ['vendorID']),
+                                              child:
+                                                  const Text('View Details')));
                                     }
                                     return emptyWidget('VENDOR NOT FOUND');
                                   })
@@ -258,16 +201,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                           color: Colors.red,
                                           fontWeight: FontWeight.bold)))
                             ]),
-                            cardWidget(context, 'TOTAL PAYMENT', [
-                              /* _selectedShippingMethod == 'PICKUP'
-                                  ? ListTile(
-                                      title: Text(
-                                          'P ${totalPayment().toStringAsFixed(2)}',
-                                          style: const TextStyle(
-                                              color: Colors.red,
-                                              fontWeight: FontWeight.bold),
-                                          textAlign: TextAlign.center))
-                                  : */
+                            cardWidget(context, 'PAYMENT', [
                               ListTile(
                                   title: DropdownButtonFormField<String>(
                                       isDense: true,
@@ -357,22 +291,23 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                     FirebaseService fbService = FirebaseService();
                     EasyLoading.show(status: 'Placing order...');
                     try {
+                      late String attachmentURL = '';
                       final newOrder = ordersCollection.doc();
                       String orderID = newOrder.id;
                       if (attachment != null) {
-                        fbService
-                            .uploadImage(attachment,
-                                'attachments/gcash/$orderID/${attachment!.name}')
-                            .then((String? url) {
-                          if (url != null) {
-                            setState(() => attachmentURL = url);
-                          }
-                        });
+                        try {
+                          String? url = await fbService.uploadImage(attachment,
+                              'attachments/gcash/$orderID/${attachment!.name}');
+                          setState(() => attachmentURL = url);
+                        } catch (e) {
+                          showDialog(
+                              context: context,
+                              builder: (_) => errorDialog(context,
+                                  'Cannot upload attachment! ${e.toString()}'));
+                        }
                       }
                       final orderData = OrderModel(
-                          attachment: _selectedPaymentMethod == 'GCASH'
-                              ? attachmentURL
-                              : null,
+                          attachment: attachmentURL,
                           customerID: authID,
                           isDelivered: false,
                           orderID: orderID,
