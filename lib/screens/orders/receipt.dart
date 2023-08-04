@@ -119,7 +119,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            const Text('Business Name:',
+                                            const Text('Vendor:',
                                                 style: TextStyle(
                                                     fontWeight:
                                                         FontWeight.bold)),
@@ -160,6 +160,67 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                                     ]);
                                   }
                                   return emptyWidget('VENDOR NOT FOUND');
+                                }),
+                            const Divider(height: 30, thickness: 2),
+                            StreamBuilder(
+                                stream: customersCollection
+                                    .where('customerID',
+                                        isEqualTo: orderData['customerID'])
+                                    .snapshots(),
+                                builder: (context, cs) {
+                                  if (cs.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return loadingWidget();
+                                  }
+                                  if (cs.hasError) {
+                                    return errorWidget(cs.error.toString());
+                                  }
+                                  if (cs.hasData) {
+                                    return Column(children: [
+                                      Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text('Customer:',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            Text(cs.data!.docs[0]['name'])
+                                          ]),
+                                      Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text('Contact Number:',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            Text(cs.data!.docs[0]['mobile'])
+                                          ]),
+                                      Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text('Email Address:',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            Text(cs.data!.docs[0]['email'])
+                                          ]),
+                                      Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text('Address:',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            Text(
+                                                '${cs.data!.docs[0]['address']}')
+                                          ])
+                                    ]);
+                                  }
+                                  return emptyWidget('CUSTOMER NOT FOUND');
                                 }),
                             FutureBuilder(
                                 future: _fetchProducts(orderData['productIDs']),
@@ -324,10 +385,17 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
         .docs
         .first
         .data();
+    final customerData = (await customersCollection
+            .where('customerID', isEqualTo: orderData['customerID'])
+            .get())
+        .docs
+        .first
+        .data();
     final font = await fontFromAssetBundle(
         'assets/fonts/RobotoMono-VariableFont_wght.ttf');
     final image = await imageFromAssetBundle('assets/images/marketdoLogo.png');
     doc.addPage(pw.Page(
+        margin: const pw.EdgeInsets.all(20),
         pageFormat: PdfPageFormat.letter,
         build: (pw.Context context) => pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -339,7 +407,9 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                   pw.Center(
                       child: pw.Text('MARKETDO APP',
                           style: pw.TextStyle(
-                              fontSize: 20, fontWeight: pw.FontWeight.bold))),
+                              font: font,
+                              fontSize: 20,
+                              fontWeight: pw.FontWeight.bold))),
                   pw.SizedBox(height: 50),
                   pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -395,6 +465,43 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                             style: pw.TextStyle(
                                 font: font, fontWeight: pw.FontWeight.bold)),
                         pw.Text('${vendorData['address']}',
+                            style: pw.TextStyle(font: font))
+                      ]),
+                  pw.Divider(height: 20),
+                  pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text('Customer:',
+                            style: pw.TextStyle(
+                                font: font, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(customerData['name'],
+                            style: pw.TextStyle(font: font))
+                      ]),
+                  pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text('Contact Number:',
+                            style: pw.TextStyle(
+                                font: font, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(customerData['mobile'],
+                            style: pw.TextStyle(font: font))
+                      ]),
+                  pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text('Email Address:',
+                            style: pw.TextStyle(
+                                font: font, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(customerData['email'],
+                            style: pw.TextStyle(font: font))
+                      ]),
+                  pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text('Address:',
+                            style: pw.TextStyle(
+                                font: font, fontWeight: pw.FontWeight.bold)),
+                        pw.Text('${customerData['address']}',
                             style: pw.TextStyle(font: font))
                       ]),
                   pw.SizedBox(height: 10),
