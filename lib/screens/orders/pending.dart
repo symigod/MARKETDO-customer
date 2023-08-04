@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:marketdo_app/firebase.services.dart';
 import 'package:marketdo_app/models/product.model.dart';
+import 'package:marketdo_app/screens/orders/receipt.dart';
 import 'package:marketdo_app/widgets/dialogs.dart';
 import 'package:marketdo_app/widgets/snapshots.dart';
 
@@ -333,7 +334,20 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                                         leading: const Icon(Icons.payments),
                                         title: const Text('Payment:'),
                                         subtitle: Text('${order['paymentMethod'] == 'COD' ? 'Cash on Delivery' : order['paymentMethod']}'),
-                                        trailing: Text('P ${numberToString(order['totalPayment'].toDouble())}', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)))
+                                        trailing: Text('P ${numberToString(order['totalPayment'].toDouble())}', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold))),
+                                    Center(
+                                        child: TextButton(
+                                            onPressed: () => Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        ReceiptScreen(
+                                                            orderID: order[
+                                                                'orderID']))),
+                                            child: const Text('View receipt',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold))))
                                   ])));
                     }
                     return emptyWidget('ORDER NOT FOUND');

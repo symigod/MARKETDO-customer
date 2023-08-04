@@ -40,9 +40,9 @@ dependencies:
   youtube_player_flutter: ^8.1.2
   email_validator: ^2.1.17
   flutter_slidable: ^3.0.0
-  receipt: ^0.0.1
   font_awesome_flutter: ^10.5.0
   pdf: ^3.10.4
+  printing: ^5.11.0
 
 
 dev_dependencies:
@@ -83,6 +83,9 @@ flutter:
     - family: Lato
       fonts:
         - asset: assets/fonts/Lato-Regular.ttf
+    - family: RobotoMono
+      fonts:
+        - asset: assets/fonts/RobotoMono-VariableFont_wght.ttf
   
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
