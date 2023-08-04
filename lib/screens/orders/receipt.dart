@@ -587,12 +587,26 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                             style: pw.TextStyle(font: font))
                       ]),
                   pw.Divider(height: 20),
-                  pw.Text(
-                      'Payment Method: ${orderData['paymentMethod'] == 'COD' ? 'Cash on Delivery' : orderData['paymentMethod']}',
-                      style: pw.TextStyle(font: font)),
-                  pw.Text(
-                      'Total Payment: P ${numberToString(orderData['totalPayment'].toDouble())}',
-                      style: pw.TextStyle(font: font)),
+                  pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text('Payment Method:',
+                            style: pw.TextStyle(
+                                font: font, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(
+                            '${orderData['paymentMethod'] == 'COD' ? 'Cash on Delivery' : orderData['paymentMethod']}',
+                            style: pw.TextStyle(font: font))
+                      ]),
+                  pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text('Total Payment:',
+                            style: pw.TextStyle(
+                                font: font, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(
+                            'P ${numberToString(orderData['totalPayment'].toDouble())}',
+                            style: pw.TextStyle(font: font))
+                      ]),
                   pw.SizedBox(height: 30),
                   pw.Center(
                       child: pw.Text('Thank you for your purchase!',
